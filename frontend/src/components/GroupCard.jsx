@@ -1,8 +1,13 @@
+import { useState } from "react";
 import axios from "axios";
 
 function GroupCard({ group, token, onJoin, onClick }) {
+  const [joining, setJoining] = useState(false);
+
   const handleJoin = async (e) => {
     e.stopPropagation();
+    if (joining) return;
+    setJoining(true);
     try {
       await axios.post(
         `http://localhost:3000/memberships/join/${group.id}`,
@@ -10,8 +15,15 @@ function GroupCard({ group, token, onJoin, onClick }) {
         { headers: { Authorization: `Bearer ${token}` } },
       );
       onJoin();
-    } catch {
-      alert("Failed to join group.");
+      onClick();
+    } catch (err) {
+      if (err.response?.status === 400) {
+        alert("You're already in this group!");
+      } else {
+        alert("Failed to join group.");
+      }
+    } finally {
+      setJoining(false);
     }
   };
 
@@ -19,7 +31,11 @@ function GroupCard({ group, token, onJoin, onClick }) {
     <div className="group-card" onClick={onClick}>
       <h3>{group.name}</h3>
       <p>{group.description}</p>
-      {token && <button onClick={handleJoin}>Join Group</button>}
+      {token && (
+        <button onClick={handleJoin} disabled={joining}>
+          {joining ? "Joining..." : "Join Group"}
+        </button>
+      )}
     </div>
   );
 }
