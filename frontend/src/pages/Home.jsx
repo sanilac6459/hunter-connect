@@ -45,10 +45,10 @@ function Home() {
   return (
     <div className="container">
       <div className="home-header">
-        <h1>Community Groups</h1>
+        <h1>Hunter College Clubs</h1>
         {user && (
           <button onClick={() => setShowForm(!showForm)}>
-            {showForm ? "Cancel" : "+ Create Group"}
+            {showForm ? "Cancel" : "+ Create Club"}
           </button>
         )}
       </div>
@@ -57,7 +57,7 @@ function Home() {
         <form className="create-form" onSubmit={handleCreateGroup}>
           <input
             type="text"
-            placeholder="Group name"
+            placeholder="Club name"
             value={name}
             onChange={(e) => setName(e.target.value)}
             required

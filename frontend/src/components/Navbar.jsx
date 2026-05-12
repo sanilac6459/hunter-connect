@@ -13,7 +13,7 @@ function Navbar() {
   return (
     <nav className="navbar">
       <Link to="/" className="navbar-brand">
-        CommunityConnect
+        HunterConnect
       </Link>
       <div className="navbar-links">
         {user ? (
