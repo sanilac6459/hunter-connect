@@ -1,0 +1,90 @@
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import { useAuth } from "../context/useAuth";
+import GroupCard from "../components/GroupCard";
+
+function Home() {
+  const { user, token } = useAuth();
+  const navigate = useNavigate();
+  const [groups, setGroups] = useState([]);
+  const [showForm, setShowForm] = useState(false);
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
+
+  const fetchGroups = async () => {
+    try {
+      const response = await axios.get("http://localhost:3000/groups");
+      setGroups(response.data);
+    } catch {
+      alert("Failed to fetch groups.");
+    }
+  };
+
+  useEffect(() => {
+    fetchGroups();
+  }, []);
+
+  const handleCreateGroup = async (e) => {
+    e.preventDefault();
+    try {
+      await axios.post(
+        "http://localhost:3000/groups",
+        { name, description },
+        { headers: { Authorization: `Bearer ${token}` } },
+      );
+      setName("");
+      setDescription("");
+      setShowForm(false);
+      fetchGroups();
+    } catch {
+      alert("Failed to create group.");
+    }
+  };
+
+  return (
+    <div className="container">
+      <div className="home-header">
+        <h1>Community Groups</h1>
+        {user && (
+          <button onClick={() => setShowForm(!showForm)}>
+            {showForm ? "Cancel" : "+ Create Group"}
+          </button>
+        )}
+      </div>
+
+      {showForm && (
+        <form className="create-form" onSubmit={handleCreateGroup}>
+          <input
+            type="text"
+            placeholder="Group name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            required
+          />
+          <textarea
+            placeholder="Description"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            required
+          />
+          <button type="submit">Create Group</button>
+        </form>
+      )}
+
+      <div className="groups-grid">
+        {groups.map((group) => (
+          <GroupCard
+            key={group.id}
+            group={group}
+            token={token}
+            onJoin={fetchGroups}
+            onClick={() => navigate(`/groups/${group.id}`)}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+export default Home;
