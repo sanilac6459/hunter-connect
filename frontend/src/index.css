@@ -289,6 +289,8 @@ body {
 
 .post-card small {
   color: #999;
+  display: block;
+  margin-top: 0.5rem;
 }
 
 .post-actions {
@@ -312,4 +314,12 @@ body {
 .post-actions button:last-child {
   background-color: #e74c3c;
   color: white;
+}
+
+.post-image {
+  width: 200px;
+  height: 150px;
+  object-fit: cover;
+  border-radius: 4px;
+  margin: 0.8rem 0;
 }

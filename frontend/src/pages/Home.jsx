@@ -73,6 +73,7 @@ function Home() {
       )}
 
       <div className="groups-grid">
+        {groups.length === 0 && <p>No clubs yet! Create one!</p>}
         {groups.map((group) => (
           <GroupCard
             key={group.id}

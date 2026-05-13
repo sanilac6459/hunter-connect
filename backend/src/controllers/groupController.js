@@ -75,18 +75,20 @@ const deleteGroup = async (req, res) => {
   const { id } = req.params;
   const userId = req.user.id;
   try {
-    // Check if user is a member
     const membership = await prisma.membership.findFirst({
       where: { groupId: parseInt(id), userId },
     });
     if (!membership)
       return res.status(403).json({ error: "Not a member of this group." });
 
-    await prisma.group.delete({
-      where: { id: parseInt(id) },
-    });
+    // Delete related records first
+    await prisma.post.deleteMany({ where: { groupId: parseInt(id) } });
+    await prisma.membership.deleteMany({ where: { groupId: parseInt(id) } });
+
+    await prisma.group.delete({ where: { id: parseInt(id) } });
     res.json({ message: "Group deleted successfully." });
   } catch (error) {
+    console.error(error);
     res.status(500).json({ error: "Something went wrong." });
   }
 };

@@ -14,6 +14,7 @@ function GroupDetails() {
   const [showPostForm, setShowPostForm] = useState(false);
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
+  const [image, setImage] = useState(null);
   const [editingPost, setEditingPost] = useState(null);
 
   const fetchGroup = async () => {
@@ -46,13 +47,17 @@ function GroupDetails() {
   const handleCreatePost = async (e) => {
     e.preventDefault();
     try {
-      await axios.post(
-        `http://localhost:3000/posts/group/${id}`,
-        { title, content },
-        { headers: { Authorization: `Bearer ${token}` } },
-      );
+      const formData = new FormData();
+      formData.append("title", title);
+      formData.append("content", content);
+      if (image) formData.append("image", image);
+
+      await axios.post(`http://localhost:3000/posts/group/${id}`, formData, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       setTitle("");
       setContent("");
+      setImage(null);
       setShowPostForm(false);
       fetchPosts();
     } catch {
@@ -74,14 +79,20 @@ function GroupDetails() {
   const handleEditPost = async (e) => {
     e.preventDefault();
     try {
+      const formData = new FormData();
+      formData.append("title", title);
+      formData.append("content", content);
+      if (image) formData.append("image", image);
+
       await axios.put(
         `http://localhost:3000/posts/${editingPost.id}`,
-        { title, content },
+        formData,
         { headers: { Authorization: `Bearer ${token}` } },
       );
       setEditingPost(null);
       setTitle("");
       setContent("");
+      setImage(null);
       fetchPosts();
     } catch {
       alert("Failed to update post.");
@@ -141,6 +152,7 @@ function GroupDetails() {
                 setEditingPost(null);
                 setTitle("");
                 setContent("");
+                setImage(null);
               }}
             >
               {showPostForm ? "Cancel" : "+ New Post"}
@@ -165,6 +177,11 @@ function GroupDetails() {
                 onChange={(e) => setContent(e.target.value)}
                 required
               />
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => setImage(e.target.files[0])}
+              />
               <button type="submit">
                 {editingPost ? "Update Post" : "Create Post"}
               </button>
@@ -183,6 +200,7 @@ function GroupDetails() {
                   setEditingPost(post);
                   setTitle(post.title);
                   setContent(post.content);
+                  setImage(null);
                   setShowPostForm(true);
                 }}
               />
