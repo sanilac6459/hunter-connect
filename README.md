@@ -1,1 +1,1 @@
-# community-connect
+# hunter-connect
