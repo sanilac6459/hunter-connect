@@ -3,6 +3,9 @@ function PostCard({ post, currentUser, onDelete, onEdit }) {
     <div className="post-card">
       <h3>{post.title}</h3>
       <p>{post.content}</p>
+      {post.imageUrl && (
+        <img src={post.imageUrl} alt="Post" className="post-image" />
+      )}
       <small>Posted by {post.user.name}</small>
       {currentUser && currentUser.id === post.userId && (
         <div className="post-actions">
