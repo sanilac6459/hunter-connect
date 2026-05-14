@@ -1,14 +1,17 @@
 import { useState } from "react";
 import axios from "axios";
 
+// card component to display group information on the home page
 function GroupCard({ group, token, onJoin, onClick }) {
   const [joining, setJoining] = useState(false);
 
+  // handle joining the group
   const handleJoin = async (e) => {
     e.stopPropagation();
     if (joining) return;
     setJoining(true);
     try {
+      // create membership in the backend
       await axios.post(
         `http://localhost:3000/memberships/join/${group.id}`,
         {},
@@ -27,6 +30,7 @@ function GroupCard({ group, token, onJoin, onClick }) {
     }
   };
 
+  // render the group card
   return (
     <div className="group-card" onClick={onClick}>
       <div className="group-card-header">

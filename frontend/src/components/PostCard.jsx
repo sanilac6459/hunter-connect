@@ -1,3 +1,5 @@
+// post card component to display individual posts in the group details page
+
 function PostCard({ post, currentUser, onDelete, onEdit }) {
   return (
     <div className="post-card">

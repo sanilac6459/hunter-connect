@@ -1,3 +1,5 @@
+// navigation bar component
+
 import { useState, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/useAuth";
@@ -9,7 +11,7 @@ function Navbar() {
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef(null);
 
-  // Close dropdown when clicking outside
+  // close dropdown when clicking outside - user's profile picture
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
@@ -20,11 +22,13 @@ function Navbar() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  // handle user logout
   const handleLogout = () => {
     logout();
     navigate("/login");
   };
 
+  // handle profile picture upload
   const handleImageUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -42,6 +46,7 @@ function Navbar() {
     }
   };
 
+  // render the navigation bar
   return (
     <nav className="navbar">
       <Link to="/" className="navbar-brand">

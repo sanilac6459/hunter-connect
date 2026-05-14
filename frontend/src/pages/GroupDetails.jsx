@@ -1,9 +1,12 @@
+// shows each club's details, posts, and allows members to create/edit/delete posts and leave the club
+
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useAuth } from "../context/useAuth";
 import PostCard from "../components/PostCard";
 
+// group details page component
 function GroupDetails() {
   const { id } = useParams();
   const { user, token } = useAuth();
@@ -17,6 +20,7 @@ function GroupDetails() {
   const [image, setImage] = useState(null);
   const [editingPost, setEditingPost] = useState(null);
 
+  // fetch group details from the backend
   const fetchGroup = async () => {
     try {
       const response = await axios.get(`http://localhost:3000/groups/${id}`);
@@ -26,6 +30,7 @@ function GroupDetails() {
     }
   };
 
+  // fetch posts for this group and check if user is a member
   const fetchPosts = async () => {
     try {
       const response = await axios.get(
@@ -39,11 +44,13 @@ function GroupDetails() {
     }
   };
 
+  // fetch group details and posts on component mount
   useEffect(() => {
     fetchGroup();
     if (token) fetchPosts();
   }, [id]);
 
+  // handle form submission to create a new post
   const handleCreatePost = async (e) => {
     e.preventDefault();
     try {
@@ -52,6 +59,7 @@ function GroupDetails() {
       formData.append("content", content);
       if (image) formData.append("image", image);
 
+      // create post in the backend
       await axios.post(`http://localhost:3000/posts/group/${id}`, formData, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -65,6 +73,7 @@ function GroupDetails() {
     }
   };
 
+  // handle post deletion
   const handleDeletePost = async (postId) => {
     try {
       await axios.delete(`http://localhost:3000/posts/${postId}`, {
@@ -76,6 +85,7 @@ function GroupDetails() {
     }
   };
 
+  // handle form submission to edit an existing post
   const handleEditPost = async (e) => {
     e.preventDefault();
     try {
@@ -84,6 +94,7 @@ function GroupDetails() {
       formData.append("content", content);
       if (image) formData.append("image", image);
 
+      // update post in the backend
       await axios.put(
         `http://localhost:3000/posts/${editingPost.id}`,
         formData,
@@ -99,8 +110,10 @@ function GroupDetails() {
     }
   };
 
+  // handle leaving the group
   const handleLeaveGroup = async () => {
     try {
+      // delete membership in the backend
       await axios.delete(`http://localhost:3000/memberships/leave/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -110,8 +123,10 @@ function GroupDetails() {
     }
   };
 
+  // handle deleting the group
   const handleDeleteGroup = async () => {
     try {
+      // delete group in the backend
       await axios.delete(`http://localhost:3000/groups/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -121,8 +136,9 @@ function GroupDetails() {
     }
   };
 
-  if (!group) return <div className="container">Loading...</div>;
+  if (!group) return <div className="container">Loading...</div>; // show loading state while fetching group details
 
+  // render the group details page
   return (
     <div className="container">
       <div className="group-header">

@@ -1,13 +1,16 @@
 import { createContext, useState } from "react";
 
+// create a context to share user data across the entire app
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
+  // load user and token from localStorage so the user stays logged in on page refresh
   const [user, setUser] = useState(
     JSON.parse(localStorage.getItem("user")) || null,
   );
   const [token, setToken] = useState(localStorage.getItem("token") || null);
 
+  // function to log in the user and save their data and token to state and localStorage
   const login = (userData, tokenData) => {
     setUser(userData);
     setToken(tokenData);
@@ -15,6 +18,7 @@ export const AuthProvider = ({ children }) => {
     localStorage.setItem("token", tokenData);
   };
 
+  // function to log out the user and clear their data and token from state and localStorage
   const logout = () => {
     setUser(null);
     setToken(null);
@@ -22,6 +26,7 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem("token");
   };
 
+  // function to update the user data in state and localStorage
   const updateUser = (userData) => {
     setUser(userData);
     localStorage.setItem("user", JSON.stringify(userData));

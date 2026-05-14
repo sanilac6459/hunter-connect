@@ -1,9 +1,12 @@
+// home page that shows all clubs and allows logged in users to create new clubs
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useAuth } from "../context/useAuth";
 import GroupCard from "../components/GroupCard";
 
+// home page component
 function Home() {
   const { user, token } = useAuth();
   const navigate = useNavigate();
@@ -13,6 +16,7 @@ function Home() {
   const [description, setDescription] = useState("");
   const [image, setImage] = useState(null);
 
+  // fetch all clubs from the backend
   const fetchGroups = async () => {
     try {
       const response = await axios.get("http://localhost:3000/groups");
@@ -22,10 +26,12 @@ function Home() {
     }
   };
 
+  // fetch groups on component mount
   useEffect(() => {
     fetchGroups();
   }, []);
 
+  // handle form submission to create a new club
   const handleCreateGroup = async (e) => {
     e.preventDefault();
     try {
@@ -47,6 +53,7 @@ function Home() {
     }
   };
 
+  // render the home page
   return (
     <div className="container">
       <div className="home-header">

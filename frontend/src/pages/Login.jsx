@@ -1,8 +1,11 @@
+// login page
+
 import { useForm } from "react-hook-form";
 import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
 import { useAuth } from "../context/useAuth";
 
+// login page component
 function Login() {
   const {
     register,
@@ -12,6 +15,7 @@ function Login() {
   const { login } = useAuth();
   const navigate = useNavigate();
 
+  // handle form submission and log in the user
   const onSubmit = async (data) => {
     try {
       const response = await axios.post(
@@ -25,6 +29,7 @@ function Login() {
     }
   };
 
+  // render the login form
   return (
     <div className="auth-container">
       <h2>Login</h2>
