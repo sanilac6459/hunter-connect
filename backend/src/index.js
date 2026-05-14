@@ -7,6 +7,7 @@ const authRoutes = require("./routes/authRoutes");
 const groupRoutes = require("./routes/groupRoutes");
 const postRoutes = require("./routes/postRoutes");
 const membershipRoutes = require("./routes/membershipRoutes");
+const userRoutes = require("./routes/userRoutes");
 
 const app = express();
 
@@ -19,6 +20,7 @@ app.use("/auth", authRoutes);
 app.use("/groups", groupRoutes);
 app.use("/posts", postRoutes);
 app.use("/memberships", membershipRoutes);
+app.use("/users", userRoutes);
 
 // Test route
 app.get("/", (req, res) => {
