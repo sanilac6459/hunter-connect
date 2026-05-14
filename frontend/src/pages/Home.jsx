@@ -6,6 +6,7 @@ import axios from "axios";
 import { useAuth } from "../context/useAuth";
 import GroupCard from "../components/GroupCard";
 
+// home page component
 function Home() {
   const { user, token } = useAuth();
   const navigate = useNavigate();
@@ -16,6 +17,7 @@ function Home() {
   const [description, setDescription] = useState("");
   const [image, setImage] = useState(null);
 
+  // fetch all clubs when the page first loads
   useEffect(() => {
     const fetchGroups = async () => {
       try {
@@ -42,6 +44,7 @@ function Home() {
     fetchMemberships();
   }, [token]);
 
+  // refresh the clubs list after creating a new one
   const refetchGroups = useCallback(async () => {
     try {
       const response = await axios.get("http://localhost:3000/groups");
@@ -51,6 +54,7 @@ function Home() {
     }
   }, []);
 
+  // handle creating a new group
   const handleCreateGroup = async (e) => {
     e.preventDefault();
     try {
@@ -67,7 +71,7 @@ function Home() {
         },
       );
 
-      // creator is auto-joined, so add the new group id to joinedGroupIds immediately
+      // creator is auto-joined once they create the group
       setJoinedGroupIds((prev) => new Set([...prev, response.data.id]));
 
       setName("");
@@ -80,6 +84,7 @@ function Home() {
     }
   };
 
+  // handle closing the create group modal
   const handleCloseModal = () => {
     setShowForm(false);
     setName("");
@@ -87,6 +92,7 @@ function Home() {
     setImage(null);
   };
 
+  // render the home page
   return (
     <div className="container">
       <div className="home-header">

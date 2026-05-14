@@ -6,6 +6,7 @@ import axios from "axios";
 import { useAuth } from "../context/useAuth";
 import PostCard from "../components/PostCard";
 
+// group details page component
 function GroupDetails() {
   const { id } = useParams();
   const { user, token } = useAuth();
@@ -19,9 +20,11 @@ function GroupDetails() {
   const [image, setImage] = useState(null);
   const [editingPost, setEditingPost] = useState(null);
 
+  // fetch the club details and posts when the page first loads
   useEffect(() => {
     const fetchGroup = async () => {
       try {
+        // fetch club details from the backend
         const response = await axios.get(`http://localhost:3000/groups/${id}`);
         setGroup(response.data);
       } catch {
@@ -29,6 +32,7 @@ function GroupDetails() {
       }
     };
 
+    // fetch posts for this club and confirm the user is a member
     const fetchPosts = async () => {
       try {
         const response = await axios.get(
@@ -46,6 +50,7 @@ function GroupDetails() {
     if (token) fetchPosts();
   }, [id, token]);
 
+  // refetch posts after creating/editing/deleting a post
   const refetchPosts = useCallback(async () => {
     try {
       const response = await axios.get(
@@ -59,6 +64,16 @@ function GroupDetails() {
     }
   }, [id, token]);
 
+  // handle closing the create/edit post modal
+  const handleCloseModal = () => {
+    setShowPostForm(false);
+    setEditingPost(null);
+    setTitle("");
+    setContent("");
+    setImage(null);
+  };
+
+  // handle form submission to create a new post
   const handleCreatePost = async (e) => {
     e.preventDefault();
     try {
@@ -67,21 +82,21 @@ function GroupDetails() {
       formData.append("content", content);
       if (image) formData.append("image", image);
 
+      // send create post request to the backend
       await axios.post(`http://localhost:3000/posts/group/${id}`, formData, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setTitle("");
-      setContent("");
-      setImage(null);
-      setShowPostForm(false);
+      handleCloseModal();
       refetchPosts();
     } catch {
       alert("Failed to create post.");
     }
   };
 
+  // handle deleting a post
   const handleDeletePost = async (postId) => {
     try {
+      // send delete request to the backend
       await axios.delete(`http://localhost:3000/posts/${postId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -91,6 +106,7 @@ function GroupDetails() {
     }
   };
 
+  // handle editing a post
   const handleEditPost = async (e) => {
     e.preventDefault();
     try {
@@ -99,21 +115,20 @@ function GroupDetails() {
       formData.append("content", content);
       if (image) formData.append("image", image);
 
+      // send update request to the backend
       await axios.put(
         `http://localhost:3000/posts/${editingPost.id}`,
         formData,
         { headers: { Authorization: `Bearer ${token}` } },
       );
-      setEditingPost(null);
-      setTitle("");
-      setContent("");
-      setImage(null);
+      handleCloseModal();
       refetchPosts();
     } catch {
       alert("Failed to update post.");
     }
   };
 
+  // handle leaving the group
   const handleLeaveGroup = async () => {
     try {
       await axios.delete(`http://localhost:3000/memberships/leave/${id}`, {
@@ -125,6 +140,7 @@ function GroupDetails() {
     }
   };
 
+  // handle deleting the group
   const handleDeleteGroup = async () => {
     try {
       await axios.delete(`http://localhost:3000/groups/${id}`, {
@@ -136,32 +152,35 @@ function GroupDetails() {
     }
   };
 
-  if (!group) return <div className="container">Loading...</div>;
+  if (!group) return <div className="container">Loading...</div>; // show loading state while fetching group details
 
+  // render the group details page
   return (
     <div className="container">
       <div className="group-header">
         <div className="group-header-top">
-          {group.imageUrl ? (
-            <img
-              src={group.imageUrl}
-              alt={group.name}
-              className="group-details-avatar"
-            />
-          ) : (
-            <div className="group-details-avatar-placeholder">
-              {group.name.charAt(0).toUpperCase()}
+          <div className="group-header-left">
+            {group.imageUrl ? (
+              <img
+                src={group.imageUrl}
+                alt={group.name}
+                className="group-details-avatar"
+              />
+            ) : (
+              <div className="group-details-avatar-placeholder">
+                {group.name.charAt(0).toUpperCase()}
+              </div>
+            )}
+            <h1>{group.name}</h1>
+          </div>
+          {user && isMember && (
+            <div className="group-actions">
+              <button onClick={handleLeaveGroup}>Leave Group</button>
+              <button onClick={handleDeleteGroup}>Delete Group</button>
             </div>
           )}
-          <h1>{group.name}</h1>
         </div>
         <p>{group.description}</p>
-        {user && isMember && (
-          <div className="group-actions">
-            <button onClick={handleLeaveGroup}>Leave Group</button>
-            <button onClick={handleDeleteGroup}>Delete Group</button>
-          </div>
-        )}
       </div>
 
       {!token && <p>Please login to view posts and join this group.</p>}
@@ -174,46 +193,53 @@ function GroupDetails() {
         <>
           <div className="posts-header">
             <h2>Posts</h2>
-            <button
-              onClick={() => {
-                setShowPostForm(!showPostForm);
-                setEditingPost(null);
-                setTitle("");
-                setContent("");
-                setImage(null);
-              }}
-            >
-              {showPostForm ? "Cancel" : "+ New Post"}
-            </button>
+            <button onClick={() => setShowPostForm(true)}>+ New Post</button>
           </div>
 
           {showPostForm && (
-            <form
-              className="create-form"
-              onSubmit={editingPost ? handleEditPost : handleCreatePost}
-            >
-              <input
-                type="text"
-                placeholder="Post title"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                required
-              />
-              <textarea
-                placeholder="Post content"
-                value={content}
-                onChange={(e) => setContent(e.target.value)}
-                required
-              />
-              <input
-                type="file"
-                accept="image/*"
-                onChange={(e) => setImage(e.target.files[0])}
-              />
-              <button type="submit">
-                {editingPost ? "Update Post" : "Create Post"}
-              </button>
-            </form>
+            <div className="modal-overlay" onClick={handleCloseModal}>
+              <div className="modal" onClick={(e) => e.stopPropagation()}>
+                <button className="modal-close" onClick={handleCloseModal}>
+                  ✕
+                </button>
+                <h2>{editingPost ? "Edit Post" : "Create a New Post"}</h2>
+                <form
+                  className="create-form"
+                  onSubmit={editingPost ? handleEditPost : handleCreatePost}
+                >
+                  <div className="form-group">
+                    <label>Title</label>
+                    <input
+                      type="text"
+                      placeholder="Post title"
+                      value={title}
+                      onChange={(e) => setTitle(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Content</label>
+                    <textarea
+                      placeholder="Post content"
+                      value={content}
+                      onChange={(e) => setContent(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Image</label>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => setImage(e.target.files[0])}
+                    />
+                  </div>
+                  <button type="submit">
+                    {editingPost ? "Update Post" : "Create Post"}
+                  </button>
+                </form>
+              </div>
+            </div>
           )}
 
           <div className="posts-list">

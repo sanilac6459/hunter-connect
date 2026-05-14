@@ -316,8 +316,21 @@ body {
 .group-header-top {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 16px;
   margin-bottom: 12px;
+}
+
+.group-header-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.group-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .group-details-avatar {
