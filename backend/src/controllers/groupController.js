@@ -1,4 +1,17 @@
+const { PrismaClient } = require("@prisma/client");
 const prisma = require("../prismaClient");
+const supabase = require("../supabaseClient");
+
+// Helper function to upload image to Supabase Storage
+const uploadImage = async (file) => {
+  const fileName = `${Date.now()}_${file.originalname}`;
+  const { error } = await supabase.storage
+    .from("post-images")
+    .upload(fileName, file.buffer, { contentType: file.mimetype });
+  if (error) throw error;
+  const { data } = supabase.storage.from("post-images").getPublicUrl(fileName);
+  return data.publicUrl;
+};
 
 // Get all groups
 const getAllGroups = async (req, res) => {
@@ -32,17 +45,20 @@ const createGroup = async (req, res) => {
   const { name, description } = req.body;
   const userId = req.user.id;
   try {
+    let imageUrl = null;
+    if (req.file) imageUrl = await uploadImage(req.file);
+
     const group = await prisma.group.create({
-      data: { name, description },
+      data: { name, description, imageUrl },
     });
 
-    // Automatically add creator as a member
     await prisma.membership.create({
       data: { userId, groupId: group.id },
     });
 
     res.status(201).json(group);
   } catch (error) {
+    console.error(error);
     res.status(500).json({ error: "Something went wrong." });
   }
 };
@@ -53,16 +69,18 @@ const updateGroup = async (req, res) => {
   const { name, description } = req.body;
   const userId = req.user.id;
   try {
-    // Check if user is a member
     const membership = await prisma.membership.findFirst({
       where: { groupId: parseInt(id), userId },
     });
     if (!membership)
       return res.status(403).json({ error: "Not a member of this group." });
 
+    let imageUrl = undefined;
+    if (req.file) imageUrl = await uploadImage(req.file);
+
     const group = await prisma.group.update({
       where: { id: parseInt(id) },
-      data: { name, description },
+      data: { name, description, ...(imageUrl && { imageUrl }) },
     });
     res.json(group);
   } catch (error) {
@@ -81,11 +99,10 @@ const deleteGroup = async (req, res) => {
     if (!membership)
       return res.status(403).json({ error: "Not a member of this group." });
 
-    // Delete related records first
     await prisma.post.deleteMany({ where: { groupId: parseInt(id) } });
     await prisma.membership.deleteMany({ where: { groupId: parseInt(id) } });
-
     await prisma.group.delete({ where: { id: parseInt(id) } });
+
     res.json({ message: "Group deleted successfully." });
   } catch (error) {
     console.error(error);

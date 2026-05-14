@@ -1,5 +1,6 @@
 const express = require("express");
 const router = express.Router();
+const multer = require("multer");
 const {
   getAllGroups,
   getGroupById,
@@ -9,6 +10,8 @@ const {
 } = require("../controllers/groupController");
 const authenticateToken = require("../middleware/authMiddleware");
 
+const upload = multer({ storage: multer.memoryStorage() });
+
 // GET /groups - get all groups (public)
 router.get("/", getAllGroups);
 
@@ -16,10 +19,10 @@ router.get("/", getAllGroups);
 router.get("/:id", getGroupById);
 
 // POST /groups - create a group (protected)
-router.post("/", authenticateToken, createGroup);
+router.post("/", authenticateToken, upload.single("image"), createGroup);
 
 // PUT /groups/:id - update a group (protected)
-router.put("/:id", authenticateToken, updateGroup);
+router.put("/:id", authenticateToken, upload.single("image"), updateGroup);
 
 // DELETE /groups/:id - delete a group (protected)
 router.delete("/:id", authenticateToken, deleteGroup);

@@ -29,7 +29,16 @@ function GroupCard({ group, token, onJoin, onClick }) {
 
   return (
     <div className="group-card" onClick={onClick}>
-      <h3>{group.name}</h3>
+      <div className="group-card-header">
+        {group.imageUrl ? (
+          <img src={group.imageUrl} alt={group.name} className="group-avatar" />
+        ) : (
+          <div className="group-avatar-placeholder">
+            {group.name.charAt(0).toUpperCase()}
+          </div>
+        )}
+        <h3>{group.name}</h3>
+      </div>
       <p>{group.description}</p>
       {token && (
         <button onClick={handleJoin} disabled={joining}>

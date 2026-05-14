@@ -11,6 +11,7 @@ function Home() {
   const [showForm, setShowForm] = useState(false);
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
+  const [image, setImage] = useState(null);
 
   const fetchGroups = async () => {
     try {
@@ -28,13 +29,17 @@ function Home() {
   const handleCreateGroup = async (e) => {
     e.preventDefault();
     try {
-      await axios.post(
-        "http://localhost:3000/groups",
-        { name, description },
-        { headers: { Authorization: `Bearer ${token}` } },
-      );
+      const formData = new FormData();
+      formData.append("name", name);
+      formData.append("description", description);
+      if (image) formData.append("image", image);
+
+      await axios.post("http://localhost:3000/groups", formData, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       setName("");
       setDescription("");
+      setImage(null);
       setShowForm(false);
       fetchGroups();
     } catch {
@@ -68,7 +73,12 @@ function Home() {
             onChange={(e) => setDescription(e.target.value)}
             required
           />
-          <button type="submit">Create Group</button>
+          <input
+            type="file"
+            accept="image/*"
+            onChange={(e) => setImage(e.target.files[0])}
+          />
+          <button type="submit">Create Club</button>
         </form>
       )}
 
