@@ -1,3 +1,5 @@
+// handles endpoints for group CRUD operations
+
 const express = require("express");
 const router = express.Router();
 const multer = require("multer");
@@ -10,21 +12,22 @@ const {
 } = require("../controllers/groupController");
 const authenticateToken = require("../middleware/authMiddleware");
 
+// configure multer for file uploads (in-memory storage)
 const upload = multer({ storage: multer.memoryStorage() });
 
-// GET /groups - get all groups (public)
+// GET - get all groups
 router.get("/", getAllGroups);
 
-// GET /groups/:id - get a single group
+// GET - get a single group by id
 router.get("/:id", getGroupById);
 
-// POST /groups - create a group (protected)
+// POST - create a group
 router.post("/", authenticateToken, upload.single("image"), createGroup);
 
-// PUT /groups/:id - update a group (protected)
+// PUT - update a group
 router.put("/:id", authenticateToken, upload.single("image"), updateGroup);
 
-// DELETE /groups/:id - delete a group (protected)
+// DELETE - delete a group
 router.delete("/:id", authenticateToken, deleteGroup);
 
 module.exports = router;

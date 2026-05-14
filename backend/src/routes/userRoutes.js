@@ -1,12 +1,15 @@
+// handles endpoints for user profile updates
+
 const express = require("express");
 const router = express.Router();
 const multer = require("multer");
 const { updateProfilePicture } = require("../controllers/userController");
 const authenticateToken = require("../middleware/authMiddleware");
 
+// configure multer for file uploads (in-memory storage)
 const upload = multer({ storage: multer.memoryStorage() });
 
-// PUT /users/profile-picture - update profile picture (protected)
+// PUT - update profile picture (protected)
 router.put(
   "/profile-picture",
   authenticateToken,

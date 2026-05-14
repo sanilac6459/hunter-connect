@@ -1,17 +1,20 @@
+// handles user memberships as they join and leave clubs, and fetching all clubs a user is a member of
+
 const prisma = require("../prismaClient");
 
-// Join a group
+// join a club
 const joinGroup = async (req, res) => {
   const { groupId } = req.params;
   const userId = req.user.id;
   try {
-    // Check if already a member
+    // check if user is already a member
     const existingMembership = await prisma.membership.findFirst({
       where: { groupId: parseInt(groupId), userId },
     });
     if (existingMembership)
       return res.status(400).json({ error: "Already a member of this group." });
 
+    // create membership
     const membership = await prisma.membership.create({
       data: { userId, groupId: parseInt(groupId) },
     });
@@ -21,18 +24,19 @@ const joinGroup = async (req, res) => {
   }
 };
 
-// Leave a group
+// leave a club
 const leaveGroup = async (req, res) => {
   const { groupId } = req.params;
   const userId = req.user.id;
   try {
-    // Check if a member
+    // check if user is already a member
     const membership = await prisma.membership.findFirst({
       where: { groupId: parseInt(groupId), userId },
     });
     if (!membership)
       return res.status(400).json({ error: "Not a member of this group." });
 
+    // delete membership
     await prisma.membership.delete({
       where: { id: membership.id },
     });
@@ -42,7 +46,7 @@ const leaveGroup = async (req, res) => {
   }
 };
 
-// Get all groups a user is a member of
+// get all groups that the user is a member of
 const getUserGroups = async (req, res) => {
   const userId = req.user.id;
   try {
@@ -50,6 +54,7 @@ const getUserGroups = async (req, res) => {
       where: { userId },
       include: { group: true },
     });
+    // return club info for each membership
     const groups = memberships.map((m) => m.group);
     res.json(groups);
   } catch (error) {

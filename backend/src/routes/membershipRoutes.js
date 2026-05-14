@@ -1,3 +1,5 @@
+// handles endpoints for joining and leaving clubs
+
 const express = require("express");
 const router = express.Router();
 const {
@@ -7,13 +9,13 @@ const {
 } = require("../controllers/membershipController");
 const authenticateToken = require("../middleware/authMiddleware");
 
-// GET /memberships - get all groups the logged in user is a member of
+// GET - get all clubs the logged in user is a member of
 router.get("/", authenticateToken, getUserGroups);
 
-// POST /memberships/join/:groupId - join a group
+// POST - join a club
 router.post("/join/:groupId", authenticateToken, joinGroup);
 
-// DELETE /memberships/leave/:groupId - leave a group
+// DELETE - leave a club
 router.delete("/leave/:groupId", authenticateToken, leaveGroup);
 
 module.exports = router;

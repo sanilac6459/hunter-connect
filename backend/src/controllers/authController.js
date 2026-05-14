@@ -1,13 +1,15 @@
+// handles everything for user authentication
+
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const prisma = require("../prismaClient");
 
-// Register a new user
+// register user
 const register = async (req, res) => {
   const { name, email, password } = req.body;
 
   try {
-    // Check if user already exists
+    // check if user already exists
     const existingUser = await prisma.user.findUnique({
       where: { email },
     });
@@ -16,21 +18,22 @@ const register = async (req, res) => {
       return res.status(400).json({ error: "Email already in use." });
     }
 
-    // Hash password
+    // hashing password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Create user
+    // create user in db
     const user = await prisma.user.create({
       data: { name, email, password: hashedPassword },
     });
 
-    // Generate JWT token
+    // generate JWT token
     const token = jwt.sign(
       { id: user.id, email: user.email },
       process.env.JWT_SECRET,
       { expiresIn: "7d" },
     );
 
+    // return token and user info
     res.status(201).json({
       token,
       user: { id: user.id, name: user.name, email: user.email },
@@ -40,12 +43,12 @@ const register = async (req, res) => {
   }
 };
 
-// Login user
+// login existing user
 const login = async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    // Find user
+    // find user by email
     const user = await prisma.user.findUnique({
       where: { email },
     });
@@ -54,20 +57,21 @@ const login = async (req, res) => {
       return res.status(400).json({ error: "Invalid email or password." });
     }
 
-    // Check password
+    // check password
     const validPassword = await bcrypt.compare(password, user.password);
 
     if (!validPassword) {
       return res.status(400).json({ error: "Invalid email or password." });
     }
 
-    // Generate JWT token
+    // generate JWT token
     const token = jwt.sign(
       { id: user.id, email: user.email },
       process.env.JWT_SECRET,
       { expiresIn: "7d" },
     );
 
+    // return token and user info
     res.json({
       token,
       user: { id: user.id, name: user.name, email: user.email },

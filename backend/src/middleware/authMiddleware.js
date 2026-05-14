@@ -1,19 +1,21 @@
+// checks if user is authenticated before making request
+
 const jwt = require("jsonwebtoken");
 
-// Middleware to verify JWT token
+// checks if user has a valid JWT token
 const authenticateToken = (req, res, next) => {
-  // Get token from request header
+  // get token from the authorization header
   const authHeader = req.headers["authorization"];
-  const token = authHeader && authHeader.split(" ")[1]; // Bearer TOKEN
+  const token = authHeader && authHeader.split(" ")[1];
 
   if (!token) {
     return res.status(401).json({ error: "Access denied. No token provided." });
   }
 
   try {
-    // Verify token
+    // verify token and attach user info to request
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded; // Attach user info to request
+    req.user = decoded;
     next();
   } catch (error) {
     return res.status(403).json({ error: "Invalid token." });

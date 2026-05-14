@@ -2,7 +2,7 @@ const express = require("express");
 const cors = require("cors");
 require("dotenv").config();
 
-// Import routes
+// import routes
 const authRoutes = require("./routes/authRoutes");
 const groupRoutes = require("./routes/groupRoutes");
 const postRoutes = require("./routes/postRoutes");
@@ -11,20 +11,20 @@ const userRoutes = require("./routes/userRoutes");
 
 const app = express();
 
-// Middleware
+// middleware
 app.use(cors());
 app.use(express.json());
 
-// Routes
-app.use("/auth", authRoutes);
-app.use("/groups", groupRoutes);
-app.use("/posts", postRoutes);
-app.use("/memberships", membershipRoutes);
-app.use("/users", userRoutes);
+// routes
+app.use("/auth", authRoutes); // login/register
+app.use("/groups", groupRoutes); // group CRUD
+app.use("/posts", postRoutes); // post CRUD
+app.use("/memberships", membershipRoutes); // join/leave clubs
+app.use("/users", userRoutes); // user profile
 
-// Test route
+// test route
 app.get("/", (req, res) => {
-  res.json({ message: "CommunityConnect API is running!" });
+  res.json({ message: "HunterConnect API is running!" });
 });
 
 const PORT = process.env.PORT || 3000;
