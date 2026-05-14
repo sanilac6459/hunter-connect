@@ -1,6 +1,6 @@
 // shows each club's details, posts, and allows members to create/edit/delete posts and leave the club
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useAuth } from "../context/useAuth";
@@ -20,19 +20,41 @@ function GroupDetails() {
   const [image, setImage] = useState(null);
   const [editingPost, setEditingPost] = useState(null);
 
-  // fetch group details from the backend
-  const fetchGroup = async () => {
-    try {
-      const response = await axios.get(`http://localhost:3000/groups/${id}`);
-      setGroup(response.data);
-    } catch {
-      alert("Failed to fetch group.");
-    }
-  };
+  // fetch the club details and posts when the page first loads
+  useEffect(() => {
+    const fetchGroup = async () => {
+      try {
+        // fetch club details from the backend
+        const response = await axios.get(`http://localhost:3000/groups/${id}`);
+        setGroup(response.data);
+      } catch {
+        alert("Failed to fetch group.");
+      }
+    };
 
-  // fetch posts for this group and check if user is a member
-  const fetchPosts = async () => {
+    // fetch posts for this club and confirm the user is a member
+    const fetchPosts = async () => {
+      try {
+        // fetch posts from the backend
+        const response = await axios.get(
+          `http://localhost:3000/posts/group/${id}`,
+          { headers: { Authorization: `Bearer ${token}` } },
+        );
+        setPosts(response.data);
+        setIsMember(true);
+      } catch {
+        setIsMember(false);
+      }
+    };
+
+    fetchGroup();
+    if (token) fetchPosts();
+  }, [id, token]);
+
+  // refetch posts after creating/editing/deleting a post
+  const refetchPosts = useCallback(async () => {
     try {
+      // fetch posts from the backend
       const response = await axios.get(
         `http://localhost:3000/posts/group/${id}`,
         { headers: { Authorization: `Bearer ${token}` } },
@@ -42,13 +64,7 @@ function GroupDetails() {
     } catch {
       setIsMember(false);
     }
-  };
-
-  // fetch group details and posts on component mount
-  useEffect(() => {
-    fetchGroup();
-    if (token) fetchPosts();
-  }, [id]);
+  }, [id, token]);
 
   // handle form submission to create a new post
   const handleCreatePost = async (e) => {
@@ -59,7 +75,7 @@ function GroupDetails() {
       formData.append("content", content);
       if (image) formData.append("image", image);
 
-      // create post in the backend
+      // send create post request to the backend
       await axios.post(`http://localhost:3000/posts/group/${id}`, formData, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -67,25 +83,26 @@ function GroupDetails() {
       setContent("");
       setImage(null);
       setShowPostForm(false);
-      fetchPosts();
+      refetchPosts();
     } catch {
       alert("Failed to create post.");
     }
   };
 
-  // handle post deletion
+  // handle deleting a post
   const handleDeletePost = async (postId) => {
     try {
+      // send delete request to the backend
       await axios.delete(`http://localhost:3000/posts/${postId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      fetchPosts();
+      refetchPosts();
     } catch {
       alert("Failed to delete post.");
     }
   };
 
-  // handle form submission to edit an existing post
+  // handle editing a post
   const handleEditPost = async (e) => {
     e.preventDefault();
     try {
@@ -94,17 +111,19 @@ function GroupDetails() {
       formData.append("content", content);
       if (image) formData.append("image", image);
 
-      // update post in the backend
+      // send update request to the backend
       await axios.put(
         `http://localhost:3000/posts/${editingPost.id}`,
         formData,
-        { headers: { Authorization: `Bearer ${token}` } },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
       );
       setEditingPost(null);
       setTitle("");
       setContent("");
       setImage(null);
-      fetchPosts();
+      refetchPosts();
     } catch {
       alert("Failed to update post.");
     }
@@ -113,7 +132,6 @@ function GroupDetails() {
   // handle leaving the group
   const handleLeaveGroup = async () => {
     try {
-      // delete membership in the backend
       await axios.delete(`http://localhost:3000/memberships/leave/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -126,7 +144,6 @@ function GroupDetails() {
   // handle deleting the group
   const handleDeleteGroup = async () => {
     try {
-      // delete group in the backend
       await axios.delete(`http://localhost:3000/groups/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });

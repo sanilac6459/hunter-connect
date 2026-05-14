@@ -1,6 +1,6 @@
 // home page that shows all clubs and allows logged in users to create new clubs
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useAuth } from "../context/useAuth";
@@ -16,22 +16,30 @@ function Home() {
   const [description, setDescription] = useState("");
   const [image, setImage] = useState(null);
 
-  // fetch all clubs from the backend
-  const fetchGroups = async () => {
+  // fetch all clubs when the page first loads
+  useEffect(() => {
+    const fetchGroups = async () => {
+      try {
+        const response = await axios.get("http://localhost:3000/groups");
+        setGroups(response.data);
+      } catch {
+        alert("Failed to fetch groups.");
+      }
+    };
+    fetchGroups();
+  }, []);
+
+  // refresh the clubs list after creating a new one
+  const refetchGroups = useCallback(async () => {
     try {
       const response = await axios.get("http://localhost:3000/groups");
       setGroups(response.data);
     } catch {
       alert("Failed to fetch groups.");
     }
-  };
-
-  // fetch groups on component mount
-  useEffect(() => {
-    fetchGroups();
   }, []);
 
-  // handle form submission to create a new club
+  // handle creating a new group
   const handleCreateGroup = async (e) => {
     e.preventDefault();
     try {
@@ -47,7 +55,7 @@ function Home() {
       setDescription("");
       setImage(null);
       setShowForm(false);
-      fetchGroups();
+      refetchGroups();
     } catch {
       alert("Failed to create group.");
     }
@@ -96,7 +104,7 @@ function Home() {
             key={group.id}
             group={group}
             token={token}
-            onJoin={fetchGroups}
+            onJoin={refetchGroups}
             onClick={() => navigate(`/groups/${group.id}`)}
           />
         ))}

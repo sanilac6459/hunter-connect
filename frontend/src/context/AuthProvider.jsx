@@ -1,7 +1,5 @@
-import { createContext, useState } from "react";
-
-// create a context to share user data across the entire app
-export const AuthContext = createContext();
+import { useState } from "react";
+import { AuthContext } from "./AuthContext";
 
 export const AuthProvider = ({ children }) => {
   // load user and token from localStorage so the user stays logged in on page refresh
