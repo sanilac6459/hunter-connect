@@ -6,7 +6,6 @@ import axios from "axios";
 import { useAuth } from "../context/useAuth";
 import PostCard from "../components/PostCard";
 
-// group details page component
 function GroupDetails() {
   const { id } = useParams();
   const { user, token } = useAuth();
@@ -20,11 +19,9 @@ function GroupDetails() {
   const [image, setImage] = useState(null);
   const [editingPost, setEditingPost] = useState(null);
 
-  // fetch the club details and posts when the page first loads
   useEffect(() => {
     const fetchGroup = async () => {
       try {
-        // fetch club details from the backend
         const response = await axios.get(`http://localhost:3000/groups/${id}`);
         setGroup(response.data);
       } catch {
@@ -32,10 +29,8 @@ function GroupDetails() {
       }
     };
 
-    // fetch posts for this club and confirm the user is a member
     const fetchPosts = async () => {
       try {
-        // fetch posts from the backend
         const response = await axios.get(
           `http://localhost:3000/posts/group/${id}`,
           { headers: { Authorization: `Bearer ${token}` } },
@@ -51,10 +46,8 @@ function GroupDetails() {
     if (token) fetchPosts();
   }, [id, token]);
 
-  // refetch posts after creating/editing/deleting a post
   const refetchPosts = useCallback(async () => {
     try {
-      // fetch posts from the backend
       const response = await axios.get(
         `http://localhost:3000/posts/group/${id}`,
         { headers: { Authorization: `Bearer ${token}` } },
@@ -66,7 +59,6 @@ function GroupDetails() {
     }
   }, [id, token]);
 
-  // handle form submission to create a new post
   const handleCreatePost = async (e) => {
     e.preventDefault();
     try {
@@ -75,7 +67,6 @@ function GroupDetails() {
       formData.append("content", content);
       if (image) formData.append("image", image);
 
-      // send create post request to the backend
       await axios.post(`http://localhost:3000/posts/group/${id}`, formData, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -89,10 +80,8 @@ function GroupDetails() {
     }
   };
 
-  // handle deleting a post
   const handleDeletePost = async (postId) => {
     try {
-      // send delete request to the backend
       await axios.delete(`http://localhost:3000/posts/${postId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -102,7 +91,6 @@ function GroupDetails() {
     }
   };
 
-  // handle editing a post
   const handleEditPost = async (e) => {
     e.preventDefault();
     try {
@@ -111,13 +99,10 @@ function GroupDetails() {
       formData.append("content", content);
       if (image) formData.append("image", image);
 
-      // send update request to the backend
       await axios.put(
         `http://localhost:3000/posts/${editingPost.id}`,
         formData,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        },
+        { headers: { Authorization: `Bearer ${token}` } },
       );
       setEditingPost(null);
       setTitle("");
@@ -129,7 +114,6 @@ function GroupDetails() {
     }
   };
 
-  // handle leaving the group
   const handleLeaveGroup = async () => {
     try {
       await axios.delete(`http://localhost:3000/memberships/leave/${id}`, {
@@ -141,7 +125,6 @@ function GroupDetails() {
     }
   };
 
-  // handle deleting the group
   const handleDeleteGroup = async () => {
     try {
       await axios.delete(`http://localhost:3000/groups/${id}`, {
@@ -153,13 +136,25 @@ function GroupDetails() {
     }
   };
 
-  if (!group) return <div className="container">Loading...</div>; // show loading state while fetching group details
+  if (!group) return <div className="container">Loading...</div>;
 
-  // render the group details page
   return (
     <div className="container">
       <div className="group-header">
-        <h1>{group.name}</h1>
+        <div className="group-header-top">
+          {group.imageUrl ? (
+            <img
+              src={group.imageUrl}
+              alt={group.name}
+              className="group-details-avatar"
+            />
+          ) : (
+            <div className="group-details-avatar-placeholder">
+              {group.name.charAt(0).toUpperCase()}
+            </div>
+          )}
+          <h1>{group.name}</h1>
+        </div>
         <p>{group.description}</p>
         {user && isMember && (
           <div className="group-actions">

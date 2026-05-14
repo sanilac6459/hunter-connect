@@ -172,6 +172,57 @@ body {
   background-color: #3b1570;
 }
 
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal {
+  background: white;
+  border-radius: 12px;
+  padding: 32px;
+  width: 100%;
+  max-width: 480px;
+  position: relative;
+}
+
+.modal h2 {
+  margin-bottom: 24px;
+}
+
+.modal-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: none;
+  border: none;
+  font-size: 1.1rem;
+  cursor: pointer;
+  color: #555;
+  padding: 4px 8px;
+}
+
+.modal-close:hover {
+  color: #000;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.form-group label {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
 /* Groups grid */
 .groups-grid {
   display: grid;
@@ -253,6 +304,40 @@ body {
   font-size: 1.2rem;
   font-weight: 800;
   flex-shrink: 0;
+}
+
+.group-header {
+  background: none;
+  box-shadow: none;
+  border: none;
+  padding: 24px 0;
+}
+
+.group-header-top {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+.group-details-avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.group-details-avatar-placeholder {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background-color: #4b0082;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  font-weight: bold;
 }
 
 /* Create form */
@@ -355,6 +440,35 @@ body {
 
 .group-actions button:hover {
   opacity: 0.85;
+}
+
+.group-details-avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-bottom: 12px;
+}
+
+.group-details-avatar-placeholder {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background-color: #4b0082;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  font-weight: bold;
+  margin-bottom: 12px;
+}
+
+.group-header {
+  background: none;
+  box-shadow: none;
+  border: none;
+  padding: 24px 0;
 }
 
 /* Posts */

@@ -6,17 +6,16 @@ import axios from "axios";
 import { useAuth } from "../context/useAuth";
 import GroupCard from "../components/GroupCard";
 
-// home page component
 function Home() {
   const { user, token } = useAuth();
   const navigate = useNavigate();
   const [groups, setGroups] = useState([]);
+  const [joinedGroupIds, setJoinedGroupIds] = useState(new Set());
   const [showForm, setShowForm] = useState(false);
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [image, setImage] = useState(null);
 
-  // fetch all clubs when the page first loads
   useEffect(() => {
     const fetchGroups = async () => {
       try {
@@ -26,10 +25,23 @@ function Home() {
         alert("Failed to fetch groups.");
       }
     };
-    fetchGroups();
-  }, []);
 
-  // refresh the clubs list after creating a new one
+    const fetchMemberships = async () => {
+      if (!token) return;
+      try {
+        const response = await axios.get("http://localhost:3000/memberships", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setJoinedGroupIds(new Set(response.data.map((g) => g.id)));
+      } catch {
+        // silently fail
+      }
+    };
+
+    fetchGroups();
+    fetchMemberships();
+  }, [token]);
+
   const refetchGroups = useCallback(async () => {
     try {
       const response = await axios.get("http://localhost:3000/groups");
@@ -39,7 +51,6 @@ function Home() {
     }
   }, []);
 
-  // handle creating a new group
   const handleCreateGroup = async (e) => {
     e.preventDefault();
     try {
@@ -48,9 +59,17 @@ function Home() {
       formData.append("description", description);
       if (image) formData.append("image", image);
 
-      await axios.post("http://localhost:3000/groups", formData, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await axios.post(
+        "http://localhost:3000/groups",
+        formData,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
+
+      // creator is auto-joined, so add the new group id to joinedGroupIds immediately
+      setJoinedGroupIds((prev) => new Set([...prev, response.data.id]));
+
       setName("");
       setDescription("");
       setImage(null);
@@ -61,40 +80,62 @@ function Home() {
     }
   };
 
-  // render the home page
+  const handleCloseModal = () => {
+    setShowForm(false);
+    setName("");
+    setDescription("");
+    setImage(null);
+  };
+
   return (
     <div className="container">
       <div className="home-header">
         <h1>Hunter College Clubs</h1>
         {user && (
-          <button onClick={() => setShowForm(!showForm)}>
-            {showForm ? "Cancel" : "+ Create Club"}
-          </button>
+          <button onClick={() => setShowForm(true)}>+ Create Club</button>
         )}
       </div>
 
+      {/* modal overlay */}
       {showForm && (
-        <form className="create-form" onSubmit={handleCreateGroup}>
-          <input
-            type="text"
-            placeholder="Club name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            required
-          />
-          <textarea
-            placeholder="Description"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            required
-          />
-          <input
-            type="file"
-            accept="image/*"
-            onChange={(e) => setImage(e.target.files[0])}
-          />
-          <button type="submit">Create Club</button>
-        </form>
+        <div className="modal-overlay" onClick={handleCloseModal}>
+          <div className="modal" onClick={(e) => e.stopPropagation()}>
+            <button className="modal-close" onClick={handleCloseModal}>
+              ✕
+            </button>
+            <h2>Create a New Club</h2>
+            <form className="create-form" onSubmit={handleCreateGroup}>
+              <div className="form-group">
+                <label>Club Name</label>
+                <input
+                  type="text"
+                  placeholder="Club name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label>Description</label>
+                <textarea
+                  placeholder="Description"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label>Club Image</label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => setImage(e.target.files[0])}
+                />
+              </div>
+              <button type="submit">Create Club</button>
+            </form>
+          </div>
+        </div>
       )}
 
       <div className="groups-grid">
@@ -104,7 +145,10 @@ function Home() {
             key={group.id}
             group={group}
             token={token}
-            onJoin={refetchGroups}
+            isMember={joinedGroupIds.has(group.id)}
+            onJoin={() =>
+              setJoinedGroupIds((prev) => new Set([...prev, group.id]))
+            }
             onClick={() => navigate(`/groups/${group.id}`)}
           />
         ))}
