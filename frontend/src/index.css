@@ -133,7 +133,7 @@ body {
   margin-top: 1.2rem;
   text-align: center;
   font-size: 0.9rem;
-  color: #666;
+  color: #4a1d8a;
 }
 
 .auth-container a {
@@ -262,7 +262,7 @@ body {
 }
 
 .group-card p {
-  color: #666;
+  color: #2d1457;
   font-size: 0.9rem;
   margin-bottom: 1rem;
   line-height: 1.5;
