@@ -34,7 +34,7 @@ function Home() {
       if (!token) return;
       try {
         const response = await axios.get(
-          "${import.meta.env.VITE_API_URL}/memberships",
+          `${import.meta.env.VITE_API_URL}/memberships`,
           {
             headers: { Authorization: `Bearer ${token}` },
           },
