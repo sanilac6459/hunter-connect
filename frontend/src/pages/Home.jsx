@@ -71,7 +71,7 @@ function Home() {
       if (image) formData.append("image", image);
 
       const response = await axios.post(
-        "${import.meta.env.VITE_API_URL}/groups",
+        `${import.meta.env.VITE_API_URL}/groups`,
         formData,
         {
           headers: { Authorization: `Bearer ${token}` },
