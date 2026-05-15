@@ -13,7 +13,7 @@ function GroupCard({ group, token, onJoin, onClick, isMember }) {
     try {
       // create membership in the backend
       await axios.post(
-        `http://localhost:3000/memberships/join/${group.id}`,
+        `${import.meta.env.VITE_API_URL}/memberships/join/${group.id}`,
         {},
         { headers: { Authorization: `Bearer ${token}` } },
       );

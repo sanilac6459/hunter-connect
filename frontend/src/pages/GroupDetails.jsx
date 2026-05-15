@@ -25,7 +25,9 @@ function GroupDetails() {
     const fetchGroup = async () => {
       try {
         // fetch club details from the backend
-        const response = await axios.get(`http://localhost:3000/groups/${id}`);
+        const response = await axios.get(
+          `${import.meta.env.VITE_API_URL}/groups/${id}`,
+        );
         setGroup(response.data);
       } catch {
         alert("Failed to fetch group.");
@@ -36,7 +38,7 @@ function GroupDetails() {
     const fetchPosts = async () => {
       try {
         const response = await axios.get(
-          `http://localhost:3000/posts/group/${id}`,
+          `${import.meta.env.VITE_API_URL}/posts/group/${id}`,
           { headers: { Authorization: `Bearer ${token}` } },
         );
         setPosts(response.data);
@@ -54,7 +56,7 @@ function GroupDetails() {
   const refetchPosts = useCallback(async () => {
     try {
       const response = await axios.get(
-        `http://localhost:3000/posts/group/${id}`,
+        `${import.meta.env.VITE_API_URL}/posts/group/${id}`,
         { headers: { Authorization: `Bearer ${token}` } },
       );
       setPosts(response.data);
@@ -83,9 +85,13 @@ function GroupDetails() {
       if (image) formData.append("image", image);
 
       // send create post request to the backend
-      await axios.post(`http://localhost:3000/posts/group/${id}`, formData, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await axios.post(
+        `${import.meta.env.VITE_API_URL}/posts/group/${id}`,
+        formData,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
       handleCloseModal();
       refetchPosts();
     } catch {
@@ -97,7 +103,7 @@ function GroupDetails() {
   const handleDeletePost = async (postId) => {
     try {
       // send delete request to the backend
-      await axios.delete(`http://localhost:3000/posts/${postId}`, {
+      await axios.delete(`${import.meta.env.VITE_API_URL}/posts/${postId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       refetchPosts();
@@ -117,7 +123,7 @@ function GroupDetails() {
 
       // send update request to the backend
       await axios.put(
-        `http://localhost:3000/posts/${editingPost.id}`,
+        `${import.meta.env.VITE_API_URL}/posts/${editingPost.id}`,
         formData,
         { headers: { Authorization: `Bearer ${token}` } },
       );
@@ -131,9 +137,12 @@ function GroupDetails() {
   // handle leaving the group
   const handleLeaveGroup = async () => {
     try {
-      await axios.delete(`http://localhost:3000/memberships/leave/${id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await axios.delete(
+        `${import.meta.env.VITE_API_URL}/memberships/leave/${id}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
       navigate("/");
     } catch {
       alert("Failed to leave group.");
@@ -143,7 +152,7 @@ function GroupDetails() {
   // handle deleting the group
   const handleDeleteGroup = async () => {
     try {
-      await axios.delete(`http://localhost:3000/groups/${id}`, {
+      await axios.delete(`${import.meta.env.VITE_API_URL}/groups/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       navigate("/");

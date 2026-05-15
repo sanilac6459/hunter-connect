@@ -36,7 +36,7 @@ function Navbar() {
       const formData = new FormData();
       formData.append("image", file);
       const response = await axios.put(
-        "http://localhost:3000/users/profile-picture",
+        "${import.meta.env.VITE_API_URL}/users/profile-picture",
         formData,
         { headers: { Authorization: `Bearer ${token}` } },
       );

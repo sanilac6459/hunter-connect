@@ -21,7 +21,9 @@ function Home() {
   useEffect(() => {
     const fetchGroups = async () => {
       try {
-        const response = await axios.get("http://localhost:3000/groups");
+        const response = await axios.get(
+          "${import.meta.env.VITE_API_URL}/groups",
+        );
         setGroups(response.data);
       } catch {
         alert("Failed to fetch groups.");
@@ -31,9 +33,12 @@ function Home() {
     const fetchMemberships = async () => {
       if (!token) return;
       try {
-        const response = await axios.get("http://localhost:3000/memberships", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const response = await axios.get(
+          "${import.meta.env.VITE_API_URL}/memberships",
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          },
+        );
         setJoinedGroupIds(new Set(response.data.map((g) => g.id)));
       } catch {
         // silently fail
@@ -47,7 +52,9 @@ function Home() {
   // refresh the clubs list after creating a new one
   const refetchGroups = useCallback(async () => {
     try {
-      const response = await axios.get("http://localhost:3000/groups");
+      const response = await axios.get(
+        "${import.meta.env.VITE_API_URL}/groups",
+      );
       setGroups(response.data);
     } catch {
       alert("Failed to fetch groups.");
@@ -64,7 +71,7 @@ function Home() {
       if (image) formData.append("image", image);
 
       const response = await axios.post(
-        "http://localhost:3000/groups",
+        "${import.meta.env.VITE_API_URL}/groups",
         formData,
         {
           headers: { Authorization: `Bearer ${token}` },

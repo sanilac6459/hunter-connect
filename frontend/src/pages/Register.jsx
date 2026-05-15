@@ -19,7 +19,7 @@ function Register() {
   const onSubmit = async (data) => {
     try {
       const response = await axios.post(
-        "http://localhost:3000/auth/register",
+        "${import.meta.env.VITE_API_URL}/auth/register",
         data,
       );
       login(response.data.user, response.data.token);
