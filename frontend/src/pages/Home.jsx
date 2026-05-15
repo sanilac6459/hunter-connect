@@ -53,7 +53,7 @@ function Home() {
   const refetchGroups = useCallback(async () => {
     try {
       const response = await axios.get(
-        "${import.meta.env.VITE_API_URL}/groups",
+        `${import.meta.env.VITE_API_URL}/groups`,
       );
       setGroups(response.data);
     } catch {
