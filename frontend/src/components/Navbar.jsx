@@ -3,10 +3,9 @@
 import { useState, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/useAuth";
-import axios from "axios";
 
 function Navbar() {
-  const { user, token, logout, updateUser } = useAuth();
+  const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef(null);
@@ -26,24 +25,6 @@ function Navbar() {
   const handleLogout = () => {
     logout();
     navigate("/login");
-  };
-
-  // handle profile picture upload
-  const handleImageUpload = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    try {
-      const formData = new FormData();
-      formData.append("image", file);
-      const response = await axios.put(
-        `${import.meta.env.VITE_API_URL}/users/profile-picture`,
-        formData,
-        { headers: { Authorization: `Bearer ${token}` } },
-      );
-      updateUser(response.data);
-    } catch {
-      alert("Failed to upload profile picture.");
-    }
   };
 
   // render the navigation bar
@@ -70,23 +51,21 @@ function Navbar() {
             {showDropdown && (
               <div className="avatar-dropdown">
                 <p className="dropdown-name">Hello, {user.name}</p>
-                <label className="dropdown-upload">
-                  Change Photo
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageUpload}
-                    style={{ display: "none" }}
-                  />
-                </label>
+                <Link
+                  to="/settings"
+                  className="dropdown-settings"
+                  onClick={() => setShowDropdown(false)}
+                >
+                  Settings
+                </Link>
                 <button onClick={handleLogout}>Sign Out</button>
               </div>
             )}
           </div>
         ) : (
-          <>
-            <Link to="/login">Log In</Link>
-          </>
+          <Link to="/login" className="navbar-signin">
+            Sign In
+          </Link>
         )}
       </div>
     </nav>
