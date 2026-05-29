@@ -891,6 +891,98 @@ body {
   opacity: 0.85;
 }
 
+/* Members section */
+.members-section {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 16px;
+  box-shadow: 0 2px 12px rgba(74, 29, 138, 0.08);
+  border: 1.5px solid #ede9f7;
+  margin-bottom: 2rem;
+}
+
+.members-section h2 {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: #2d1457;
+  margin-bottom: 1rem;
+}
+
+.members-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.member-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.8rem;
+  border-radius: 8px;
+  border: 1.5px solid #ede9f7;
+}
+
+.member-info {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.member-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.member-avatar-placeholder {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background-color: #ede9f7;
+  color: #4a1d8a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  font-weight: 800;
+}
+
+.role-badge {
+  padding: 0.2rem 0.6rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.role-admin {
+  background-color: #ede9f7;
+  color: #4a1d8a;
+}
+
+.role-member {
+  background-color: #f0f0f0;
+  color: #666;
+}
+
+.role-toggle-btn {
+  background-color: white;
+  color: #4a1d8a;
+  border: 1.5px solid #4a1d8a;
+  padding: 0.35rem 0.8rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+.role-toggle-btn:hover {
+  background-color: #4a1d8a;
+  color: white;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .navbar {

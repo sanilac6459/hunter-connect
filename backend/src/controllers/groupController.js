@@ -1,10 +1,9 @@
 // handles all functionality related to clubs - creating, updating, deleting, and fetching clubs
 
-const { PrismaClient } = require("@prisma/client");
 const prisma = require("../prismaClient");
 const supabase = require("../supabaseClient");
 
-// helper function to upload image to Supabase Storage
+// Helper function to upload image to Supabase Storage
 const uploadImage = async (file) => {
   const fileName = `${Date.now()}_${file.originalname}`;
   const { error } = await supabase.storage
@@ -15,7 +14,7 @@ const uploadImage = async (file) => {
   return data.publicUrl;
 };
 
-// get all groups (clubs)
+// Get all groups
 const getAllGroups = async (req, res) => {
   try {
     const groups = await prisma.group.findMany({
@@ -27,13 +26,20 @@ const getAllGroups = async (req, res) => {
   }
 };
 
-// get single group (club) by id
+// Get a single group by id
 const getGroupById = async (req, res) => {
   const { id } = req.params;
   try {
     const group = await prisma.group.findUnique({
       where: { id: parseInt(id) },
-      include: { memberships: true, posts: true },
+      include: {
+        memberships: {
+          include: {
+            user: { select: { id: true, name: true, imageUrl: true } },
+          },
+        },
+        posts: true,
+      },
     });
     if (!group) return res.status(404).json({ error: "Group not found." });
     res.json(group);
@@ -42,11 +48,10 @@ const getGroupById = async (req, res) => {
   }
 };
 
-// creates a new group (club) and adds the creator as a member
+// Create a new group and automatically add the creator as an ADMIN
 const createGroup = async (req, res) => {
   const { name, description } = req.body;
   const userId = req.user.id;
-  // upload image
   try {
     let imageUrl = null;
     if (req.file) imageUrl = await uploadImage(req.file);
@@ -55,8 +60,9 @@ const createGroup = async (req, res) => {
       data: { name, description, imageUrl },
     });
 
+    // Add creator as ADMIN
     await prisma.membership.create({
-      data: { userId, groupId: group.id },
+      data: { userId, groupId: group.id, role: "ADMIN" },
     });
 
     res.status(201).json(group);
@@ -66,20 +72,21 @@ const createGroup = async (req, res) => {
   }
 };
 
-// update a group (club) - only members can update
+// Update a group — only admins can update
 const updateGroup = async (req, res) => {
   const { id } = req.params;
   const { name, description } = req.body;
   const userId = req.user.id;
   try {
-    // check if user is a member of club
+    // Check if user is an admin
     const membership = await prisma.membership.findFirst({
-      where: { groupId: parseInt(id), userId },
+      where: { groupId: parseInt(id), userId, role: "ADMIN" },
     });
     if (!membership)
-      return res.status(403).json({ error: "Not a member of this group." });
+      return res
+        .status(403)
+        .json({ error: "Only admins can update this group." });
 
-    // upload new image
     let imageUrl = undefined;
     if (req.file) imageUrl = await uploadImage(req.file);
 
@@ -93,24 +100,26 @@ const updateGroup = async (req, res) => {
   }
 };
 
-// delete a group (club)
+// Delete a group — only admins can delete
 const deleteGroup = async (req, res) => {
   const { id } = req.params;
   const userId = req.user.id;
-  // check if user is a member of club
   try {
+    // Check if user is an admin
     const membership = await prisma.membership.findFirst({
-      where: { groupId: parseInt(id), userId },
+      where: { groupId: parseInt(id), userId, role: "ADMIN" },
     });
     if (!membership)
-      return res.status(403).json({ error: "Not a member of this group." });
+      return res
+        .status(403)
+        .json({ error: "Only admins can delete this group." });
 
-    // delete all posts add memberships related to this club in the db
+    // Delete related records first to avoid foreign key errors
     await prisma.post.deleteMany({ where: { groupId: parseInt(id) } });
     await prisma.membership.deleteMany({ where: { groupId: parseInt(id) } });
-    await prisma.group.delete({ where: { id: parseInt(id) } }); // delete club
+    await prisma.group.delete({ where: { id: parseInt(id) } });
 
-    res.json({ message: "Club deleted successfully." });
+    res.json({ message: "Group deleted successfully." });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Something went wrong." });

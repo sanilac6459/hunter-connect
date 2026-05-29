@@ -48,6 +48,7 @@ model Post {
 model Membership {
   id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
+  role      String   @default("MEMBER")
   userId    Int
   groupId   Int
   user      User     @relation(fields: [userId], references: [id])

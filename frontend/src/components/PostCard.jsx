@@ -1,6 +1,6 @@
 // post card component to display individual posts in the group details page
 
-function PostCard({ post, currentUser, onDelete, onEdit }) {
+function PostCard({ post, currentUser, isAdmin, onDelete, onEdit }) {
   return (
     <div className="post-card">
       <h3>{post.title}</h3>
@@ -9,9 +9,11 @@ function PostCard({ post, currentUser, onDelete, onEdit }) {
         <img src={post.imageUrl} alt="Post" className="post-image" />
       )}
       <small>Posted by {post.user.name}</small>
-      {currentUser && currentUser.id === post.userId && (
+      {currentUser && (currentUser.id === post.userId || isAdmin) && (
         <div className="post-actions">
-          <button onClick={() => onEdit(post)}>Edit</button>
+          {currentUser.id === post.userId && (
+            <button onClick={() => onEdit(post)}>Edit</button>
+          )}
           <button onClick={() => onDelete(post.id)}>Delete</button>
         </div>
       )}

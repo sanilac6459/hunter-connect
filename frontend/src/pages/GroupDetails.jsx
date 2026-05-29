@@ -1,12 +1,11 @@
 // shows each club's details, posts, and allows members to create/edit/delete posts and leave the club
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useAuth } from "../context/useAuth";
 import PostCard from "../components/PostCard";
 
-// group details page component
 function GroupDetails() {
   const { id } = useParams();
   const { user, token } = useAuth();
@@ -14,68 +13,54 @@ function GroupDetails() {
   const [group, setGroup] = useState(null);
   const [posts, setPosts] = useState([]);
   const [isMember, setIsMember] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [showPostForm, setShowPostForm] = useState(false);
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [image, setImage] = useState(null);
   const [editingPost, setEditingPost] = useState(null);
+  const [showMembers, setShowMembers] = useState(false);
 
-  // fetch the club details and posts when the page first loads
-  useEffect(() => {
-    const fetchGroup = async () => {
-      try {
-        // fetch club details from the backend
-        const response = await axios.get(
-          `${import.meta.env.VITE_API_URL}/groups/${id}`,
+  const fetchGroup = async () => {
+    try {
+      const response = await axios.get(
+        `${import.meta.env.VITE_API_URL}/groups/${id}`,
+      );
+      setGroup(response.data);
+
+      if (user) {
+        const membership = response.data.memberships.find(
+          (m) => m.userId === user.id,
         );
-        setGroup(response.data);
-      } catch {
-        alert("Failed to fetch group.");
+        if (membership) {
+          setIsMember(true);
+          setIsAdmin(membership.role === "ADMIN");
+        }
       }
-    };
+    } catch {
+      alert("Failed to fetch group.");
+    }
+  };
 
-    // fetch posts for this club and confirm the user is a member
-    const fetchPosts = async () => {
-      try {
-        const response = await axios.get(
-          `${import.meta.env.VITE_API_URL}/posts/group/${id}`,
-          { headers: { Authorization: `Bearer ${token}` } },
-        );
-        setPosts(response.data);
-        setIsMember(true);
-      } catch {
-        setIsMember(false);
-      }
-    };
-
-    fetchGroup();
-    if (token) fetchPosts();
-  }, [id, token]);
-
-  // refetch posts after creating/editing/deleting a post
-  const refetchPosts = useCallback(async () => {
+  const fetchPosts = async () => {
     try {
       const response = await axios.get(
         `${import.meta.env.VITE_API_URL}/posts/group/${id}`,
         { headers: { Authorization: `Bearer ${token}` } },
       );
       setPosts(response.data);
-      setIsMember(true);
     } catch {
       setIsMember(false);
     }
-  }, [id, token]);
-
-  // handle closing the create/edit post modal
-  const handleCloseModal = () => {
-    setShowPostForm(false);
-    setEditingPost(null);
-    setTitle("");
-    setContent("");
-    setImage(null);
   };
 
-  // handle form submission to create a new post
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    fetchGroup();
+    if (token) fetchPosts();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id]);
+
   const handleCreatePost = async (e) => {
     e.preventDefault();
     try {
@@ -84,35 +69,32 @@ function GroupDetails() {
       formData.append("content", content);
       if (image) formData.append("image", image);
 
-      // send create post request to the backend
       await axios.post(
         `${import.meta.env.VITE_API_URL}/posts/group/${id}`,
         formData,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        },
+        { headers: { Authorization: `Bearer ${token}` } },
       );
-      handleCloseModal();
-      refetchPosts();
+      setTitle("");
+      setContent("");
+      setImage(null);
+      setShowPostForm(false);
+      fetchPosts();
     } catch {
       alert("Failed to create post.");
     }
   };
 
-  // handle deleting a post
   const handleDeletePost = async (postId) => {
     try {
-      // send delete request to the backend
       await axios.delete(`${import.meta.env.VITE_API_URL}/posts/${postId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      refetchPosts();
+      fetchPosts();
     } catch {
       alert("Failed to delete post.");
     }
   };
 
-  // handle editing a post
   const handleEditPost = async (e) => {
     e.preventDefault();
     try {
@@ -121,27 +103,26 @@ function GroupDetails() {
       formData.append("content", content);
       if (image) formData.append("image", image);
 
-      // send update request to the backend
       await axios.put(
         `${import.meta.env.VITE_API_URL}/posts/${editingPost.id}`,
         formData,
         { headers: { Authorization: `Bearer ${token}` } },
       );
-      handleCloseModal();
-      refetchPosts();
+      setEditingPost(null);
+      setTitle("");
+      setContent("");
+      setImage(null);
+      fetchPosts();
     } catch {
       alert("Failed to update post.");
     }
   };
 
-  // handle leaving the group
   const handleLeaveGroup = async () => {
     try {
       await axios.delete(
         `${import.meta.env.VITE_API_URL}/memberships/leave/${id}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        },
+        { headers: { Authorization: `Bearer ${token}` } },
       );
       navigate("/");
     } catch {
@@ -149,7 +130,6 @@ function GroupDetails() {
     }
   };
 
-  // handle deleting the group
   const handleDeleteGroup = async () => {
     try {
       await axios.delete(`${import.meta.env.VITE_API_URL}/groups/${id}`, {
@@ -161,39 +141,91 @@ function GroupDetails() {
     }
   };
 
-  if (!group) return <div className="container">Loading...</div>; // show loading state while fetching group details
+  const handleUpdateRole = async (targetUserId, newRole) => {
+    try {
+      await axios.put(
+        `${import.meta.env.VITE_API_URL}/memberships/${id}/role/${targetUserId}`,
+        { role: newRole },
+        { headers: { Authorization: `Bearer ${token}` } },
+      );
+      fetchGroup();
+    } catch {
+      alert("Failed to update member role.");
+    }
+  };
 
-  // render the group details page
+  if (!group) return <div className="container">Loading...</div>;
+
   return (
     <div className="container">
       <div className="group-header">
-        <div className="group-header-top">
-          <div className="group-header-left">
-            {group.imageUrl ? (
-              <img
-                src={group.imageUrl}
-                alt={group.name}
-                className="group-details-avatar"
-              />
-            ) : (
-              <div className="group-details-avatar-placeholder">
-                {group.name.charAt(0).toUpperCase()}
-              </div>
-            )}
-            <h1>{group.name}</h1>
-          </div>
-          {user && isMember && (
-            <div className="group-actions">
-              <button onClick={handleLeaveGroup}>Leave Group</button>
-              <button onClick={handleDeleteGroup}>Delete Group</button>
-            </div>
-          )}
-        </div>
+        <h1>{group.name}</h1>
         <p>{group.description}</p>
+        {user && isMember && (
+          <div className="group-actions">
+            {!isAdmin && (
+              <button onClick={handleLeaveGroup}>Leave Group</button>
+            )}
+            {isAdmin && (
+              <>
+                <button onClick={handleDeleteGroup}>Delete Group</button>
+                <button onClick={() => setShowMembers(!showMembers)}>
+                  {showMembers ? "Hide Members" : "Manage Members"}
+                </button>
+              </>
+            )}
+          </div>
+        )}
       </div>
 
-      {!token && <p>Please login to view posts and join this group.</p>}
+      {/* Members list — only visible to admins */}
+      {isAdmin && showMembers && (
+        <div className="members-section">
+          <h2>Members</h2>
+          <div className="members-list">
+            {group.memberships.map((membership) => (
+              <div key={membership.id} className="member-item">
+                <div className="member-info">
+                  {membership.user.imageUrl ? (
+                    <img
+                      src={membership.user.imageUrl}
+                      alt="avatar"
+                      className="member-avatar"
+                    />
+                  ) : (
+                    <div className="member-avatar-placeholder">
+                      {membership.user.name.charAt(0).toUpperCase()}
+                    </div>
+                  )}
+                  <span>{membership.user.name}</span>
+                  <span
+                    className={`role-badge ${membership.role === "ADMIN" ? "role-admin" : "role-member"}`}
+                  >
+                    {membership.role}
+                  </span>
+                </div>
+                {membership.userId !== user.id && (
+                  <button
+                    className="role-toggle-btn"
+                    onClick={() =>
+                      handleUpdateRole(
+                        membership.userId,
+                        membership.role === "ADMIN" ? "MEMBER" : "ADMIN",
+                      )
+                    }
+                  >
+                    {membership.role === "ADMIN"
+                      ? "Remove Admin"
+                      : "Make Admin"}
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
+      {!token && <p>Please login to view posts and join this group.</p>}
       {token && !isMember && (
         <p>You are not a member of this group. Join to see posts!</p>
       )}
@@ -202,53 +234,46 @@ function GroupDetails() {
         <>
           <div className="posts-header">
             <h2>Posts</h2>
-            <button onClick={() => setShowPostForm(true)}>+ New Post</button>
+            <button
+              onClick={() => {
+                setShowPostForm(!showPostForm);
+                setEditingPost(null);
+                setTitle("");
+                setContent("");
+                setImage(null);
+              }}
+            >
+              {showPostForm ? "Cancel" : "+ New Post"}
+            </button>
           </div>
 
           {showPostForm && (
-            <div className="modal-overlay" onClick={handleCloseModal}>
-              <div className="modal" onClick={(e) => e.stopPropagation()}>
-                <button className="modal-close" onClick={handleCloseModal}>
-                  ✕
-                </button>
-                <h2>{editingPost ? "Edit Post" : "Create a New Post"}</h2>
-                <form
-                  className="create-form"
-                  onSubmit={editingPost ? handleEditPost : handleCreatePost}
-                >
-                  <div className="form-group">
-                    <label>Title</label>
-                    <input
-                      type="text"
-                      placeholder="Post title"
-                      value={title}
-                      onChange={(e) => setTitle(e.target.value)}
-                      required
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label>Content</label>
-                    <textarea
-                      placeholder="Post content"
-                      value={content}
-                      onChange={(e) => setContent(e.target.value)}
-                      required
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label>Image</label>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => setImage(e.target.files[0])}
-                    />
-                  </div>
-                  <button type="submit">
-                    {editingPost ? "Update Post" : "Create Post"}
-                  </button>
-                </form>
-              </div>
-            </div>
+            <form
+              className="create-form"
+              onSubmit={editingPost ? handleEditPost : handleCreatePost}
+            >
+              <input
+                type="text"
+                placeholder="Post title"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                required
+              />
+              <textarea
+                placeholder="Post content"
+                value={content}
+                onChange={(e) => setContent(e.target.value)}
+                required
+              />
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => setImage(e.target.files[0])}
+              />
+              <button type="submit">
+                {editingPost ? "Update Post" : "Create Post"}
+              </button>
+            </form>
           )}
 
           <div className="posts-list">
@@ -258,6 +283,7 @@ function GroupDetails() {
                 key={post.id}
                 post={post}
                 currentUser={user}
+                isAdmin={isAdmin}
                 onDelete={handleDeletePost}
                 onEdit={(post) => {
                   setEditingPost(post);

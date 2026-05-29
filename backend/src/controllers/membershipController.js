@@ -2,21 +2,19 @@
 
 const prisma = require("../prismaClient");
 
-// join a club
+// Join a group — adds the user as a member
 const joinGroup = async (req, res) => {
   const { groupId } = req.params;
   const userId = req.user.id;
   try {
-    // check if user is already a member
     const existingMembership = await prisma.membership.findFirst({
       where: { groupId: parseInt(groupId), userId },
     });
     if (existingMembership)
       return res.status(400).json({ error: "Already a member of this group." });
 
-    // create membership
     const membership = await prisma.membership.create({
-      data: { userId, groupId: parseInt(groupId) },
+      data: { userId, groupId: parseInt(groupId), role: "MEMBER" },
     });
     res.status(201).json(membership);
   } catch (error) {
@@ -24,19 +22,17 @@ const joinGroup = async (req, res) => {
   }
 };
 
-// leave a club
+// Leave a group — removes the user as a member
 const leaveGroup = async (req, res) => {
   const { groupId } = req.params;
   const userId = req.user.id;
   try {
-    // check if user is already a member
     const membership = await prisma.membership.findFirst({
       where: { groupId: parseInt(groupId), userId },
     });
     if (!membership)
       return res.status(400).json({ error: "Not a member of this group." });
 
-    // delete membership
     await prisma.membership.delete({
       where: { id: membership.id },
     });
@@ -46,7 +42,7 @@ const leaveGroup = async (req, res) => {
   }
 };
 
-// get all groups that the user is a member of
+// Get all groups the logged in user is a member of
 const getUserGroups = async (req, res) => {
   const userId = req.user.id;
   try {
@@ -54,7 +50,7 @@ const getUserGroups = async (req, res) => {
       where: { userId },
       include: { group: true },
     });
-    // return club info for each membership
+    // Return just the group info, not the full membership object
     const groups = memberships.map((m) => m.group);
     res.json(groups);
   } catch (error) {
@@ -62,4 +58,49 @@ const getUserGroups = async (req, res) => {
   }
 };
 
-module.exports = { joinGroup, leaveGroup, getUserGroups };
+// Promote or demote a member — only admins can do this
+const updateMemberRole = async (req, res) => {
+  const { groupId, userId: targetUserId } = req.params;
+  const { role } = req.body;
+  const requestingUserId = req.user.id;
+
+  try {
+    // Check if requesting user is an admin
+    const adminMembership = await prisma.membership.findFirst({
+      where: {
+        groupId: parseInt(groupId),
+        userId: requestingUserId,
+        role: "ADMIN",
+      },
+    });
+    if (!adminMembership)
+      return res
+        .status(403)
+        .json({ error: "Only admins can change member roles." });
+
+    // Make sure role is valid
+    if (!["ADMIN", "MEMBER"].includes(role)) {
+      return res
+        .status(400)
+        .json({ error: "Invalid role. Must be ADMIN or MEMBER." });
+    }
+
+    // Find the target member's membership
+    const membership = await prisma.membership.findFirst({
+      where: { groupId: parseInt(groupId), userId: parseInt(targetUserId) },
+    });
+    if (!membership)
+      return res.status(404).json({ error: "Member not found." });
+
+    // Update the role
+    const updated = await prisma.membership.update({
+      where: { id: membership.id },
+      data: { role },
+    });
+    res.json(updated);
+  } catch (error) {
+    res.status(500).json({ error: "Something went wrong." });
+  }
+};
+
+module.exports = { joinGroup, leaveGroup, getUserGroups, updateMemberRole };
