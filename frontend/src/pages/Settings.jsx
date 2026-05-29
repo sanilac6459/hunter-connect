@@ -9,6 +9,7 @@ function Settings() {
   const navigate = useNavigate();
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const {
     register,
@@ -73,12 +74,8 @@ function Settings() {
     }
   };
 
-  // Delete account
+  // Delete account — called after modal confirmation
   const handleDeleteAccount = async () => {
-    const confirm = window.confirm(
-      "Are you sure you want to delete your account? This cannot be undone.",
-    );
-    if (!confirm) return;
     try {
       await axios.delete(`${import.meta.env.VITE_API_URL}/users/account`, {
         headers: { Authorization: `Bearer ${token}` },
@@ -86,6 +83,7 @@ function Settings() {
       logout();
       navigate("/register");
     } catch {
+      setShowDeleteModal(false);
       setError("Failed to delete account.");
     }
   };
@@ -94,6 +92,8 @@ function Settings() {
     <div className="container">
       <div className="settings-page">
         <h1>Settings</h1>
+
+        {/* Profile Picture Section */}
         <div className="settings-section">
           <h2>Profile Picture</h2>
           <div className="avatar-preview">
@@ -129,6 +129,8 @@ function Settings() {
             )}
           </div>
         </div>
+
+        {/* Edit Profile Section */}
         <div className="settings-section">
           <h2>Edit Profile</h2>
           <form onSubmit={handleSubmit(onSubmit)} className="settings-form">
@@ -155,14 +157,53 @@ function Settings() {
             </button>
           </form>
         </div>
+
+        {/* Danger Zone Section */}
         <div className="settings-section settings-danger">
           <h2>Danger Zone</h2>
           <p>Deleting your account is permanent and cannot be undone.</p>
-          <button className="settings-delete-btn" onClick={handleDeleteAccount}>
+          <button
+            className="settings-delete-btn"
+            onClick={() => setShowDeleteModal(true)}
+          >
             Delete Account
           </button>
         </div>
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && (
+        <div
+          className="modal-overlay"
+          onClick={() => setShowDeleteModal(false)}
+        >
+          <div
+            className="modal delete-modal"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="delete-modal-icon">⚠️</div>
+            <h2>Delete Account</h2>
+            <p>
+              Are you sure you want to delete your account? All your posts and
+              memberships will be permanently removed. This cannot be undone.
+            </p>
+            <div className="delete-modal-actions">
+              <button
+                className="delete-modal-cancel"
+                onClick={() => setShowDeleteModal(false)}
+              >
+                Cancel
+              </button>
+              <button
+                className="delete-modal-confirm"
+                onClick={handleDeleteAccount}
+              >
+                Yes, Delete My Account
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
