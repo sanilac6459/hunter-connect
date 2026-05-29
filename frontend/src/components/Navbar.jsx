@@ -10,7 +10,7 @@ function Navbar() {
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef(null);
 
-  // close dropdown when clicking outside - user's profile picture
+  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
@@ -21,13 +21,11 @@ function Navbar() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // handle user logout
   const handleLogout = () => {
     logout();
     navigate("/login");
   };
 
-  // render the navigation bar
   return (
     <nav className="navbar">
       <Link to="/" className="navbar-brand">
@@ -35,33 +33,48 @@ function Navbar() {
       </Link>
       <div className="navbar-links">
         {user ? (
-          <div className="avatar-wrapper" ref={dropdownRef}>
-            <div
-              className="avatar"
-              onClick={() => setShowDropdown(!showDropdown)}
-            >
-              {user.imageUrl ? (
-                <img src={user.imageUrl} alt="avatar" className="avatar-img" />
-              ) : (
-                <div className="avatar-placeholder">
-                  {user.name.charAt(0).toUpperCase()}
+          <>
+            <Link to="/" className="navbar-link">
+              Home
+            </Link>
+            <Link to="/clubs" className="navbar-link">
+              Clubs
+            </Link>
+            <Link to="/rsvps" className="navbar-link">
+              My RSVPs
+            </Link>
+            <div className="avatar-wrapper" ref={dropdownRef}>
+              <div
+                className="avatar"
+                onClick={() => setShowDropdown(!showDropdown)}
+              >
+                {user.imageUrl ? (
+                  <img
+                    src={user.imageUrl}
+                    alt="avatar"
+                    className="avatar-img"
+                  />
+                ) : (
+                  <div className="avatar-placeholder">
+                    {user.name.charAt(0).toUpperCase()}
+                  </div>
+                )}
+              </div>
+              {showDropdown && (
+                <div className="avatar-dropdown">
+                  <p className="dropdown-name">Hello, {user.name}</p>
+                  <Link
+                    to="/settings"
+                    className="dropdown-settings"
+                    onClick={() => setShowDropdown(false)}
+                  >
+                    Settings
+                  </Link>
+                  <button onClick={handleLogout}>Sign Out</button>
                 </div>
               )}
             </div>
-            {showDropdown && (
-              <div className="avatar-dropdown">
-                <p className="dropdown-name">Hello, {user.name}</p>
-                <Link
-                  to="/settings"
-                  className="dropdown-settings"
-                  onClick={() => setShowDropdown(false)}
-                >
-                  Settings
-                </Link>
-                <button onClick={handleLogout}>Sign Out</button>
-              </div>
-            )}
-          </div>
+          </>
         ) : (
           <Link to="/login" className="navbar-signin">
             Sign In

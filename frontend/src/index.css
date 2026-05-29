@@ -36,8 +36,22 @@ body {
 }
 
 .navbar-links a {
-  color: #4a1d8a;
+  color: white;
   text-decoration: none;
+}
+
+.navbar-link {
+  color: white;
+  text-decoration: none;
+  font-size: 0.95rem;
+  font-weight: 600;
+  padding: 0.3rem 0.6rem;
+  border-radius: 6px;
+  transition: background-color 0.2s;
+}
+
+.navbar-link:hover {
+  background-color: rgba(255, 255, 255, 0.15);
 }
 
 .navbar-signin {
