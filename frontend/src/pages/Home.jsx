@@ -16,6 +16,7 @@ function Home() {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [image, setImage] = useState(null);
+  const [modal, setModal] = useState({ show: false, type: "", message: "" });
 
   const fetchGroups = async () => {
     try {
@@ -32,7 +33,11 @@ function Home() {
         setUserGroupIds(new Set(membershipsRes.data.map((m) => m.id)));
       }
     } catch {
-      alert("Failed to fetch groups.");
+      setModal({
+        show: true,
+        type: "error",
+        message: "Failed to fetch groups.",
+      });
     }
   };
 
@@ -58,9 +63,25 @@ function Home() {
       setImage(null);
       setShowForm(false);
       fetchGroups();
+      setModal({
+        show: true,
+        type: "success",
+        message: "Club created successfully!",
+      });
     } catch {
-      alert("Failed to create group.");
+      setModal({
+        show: true,
+        type: "error",
+        message: "Failed to create club.",
+      });
     }
+  };
+
+  const closeFormModal = () => {
+    setShowForm(false);
+    setName("");
+    setDescription("");
+    setImage(null);
   };
 
   const filteredGroups = groups.filter((group) =>
@@ -72,9 +93,7 @@ function Home() {
       <div className="home-header">
         <h1>Hunter College Clubs</h1>
         {user && (
-          <button onClick={() => setShowForm(!showForm)}>
-            {showForm ? "Cancel" : "+ Create Club"}
-          </button>
+          <button onClick={() => setShowForm(true)}>+ Create Club</button>
         )}
       </div>
 
@@ -86,30 +105,6 @@ function Home() {
           onChange={(e) => setSearch(e.target.value)}
         />
       </div>
-
-      {showForm && (
-        <form className="create-form" onSubmit={handleCreateGroup}>
-          <input
-            type="text"
-            placeholder="Club name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            required
-          />
-          <textarea
-            placeholder="Description"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            required
-          />
-          <input
-            type="file"
-            accept="image/*"
-            onChange={(e) => setImage(e.target.files[0])}
-          />
-          <button type="submit">Create Club</button>
-        </form>
-      )}
 
       <div className="groups-grid">
         {filteredGroups.length === 0 && search && (
@@ -129,6 +124,86 @@ function Home() {
           />
         ))}
       </div>
+
+      {/* Create Club Modal */}
+      {showForm && (
+        <div className="modal-overlay" onClick={closeFormModal}>
+          <div
+            className="modal delete-modal"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2>Create a Club</h2>
+            <form className="create-form" onSubmit={handleCreateGroup}>
+              <input
+                type="text"
+                placeholder="Club name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+              />
+              <textarea
+                placeholder="Description"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                required
+              />
+              <label style={{ display: "block" }}>
+                Club Profile Picture (optional)
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => setImage(e.target.files[0])}
+                  style={{
+                    display: "block",
+                    marginTop: "0.4rem",
+                    width: "100%",
+                    boxSizing: "border-box",
+                  }}
+                />
+              </label>
+              <div className="delete-modal-actions">
+                <button
+                  type="button"
+                  className="delete-modal-cancel"
+                  onClick={closeFormModal}
+                >
+                  Cancel
+                </button>
+                <button type="submit" className="delete-modal-confirm">
+                  Create Club
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Success/Error Modal */}
+      {modal.show && (
+        <div
+          className="modal-overlay"
+          onClick={() => setModal({ ...modal, show: false })}
+        >
+          <div
+            className="modal delete-modal"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="delete-modal-icon">
+              {modal.type === "success" ? "✅" : "⚠️"}
+            </div>
+            <h2>{modal.type === "success" ? "Success" : "Error"}</h2>
+            <p>{modal.message}</p>
+            <div className="delete-modal-actions">
+              <button
+                className="delete-modal-confirm"
+                onClick={() => setModal({ ...modal, show: false })}
+              >
+                OK
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
