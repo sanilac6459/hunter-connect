@@ -1230,6 +1230,26 @@ body {
   width: fit-content;
 }
 
+/* Search bar */
+.search-bar {
+  margin-bottom: 1.5rem;
+}
+
+.search-bar input {
+  width: 100%;
+  padding: 0.65rem 1rem;
+  border: 1.5px solid #ddd;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-family: inherit;
+  transition: border-color 0.2s;
+}
+
+.search-bar input:focus {
+  outline: none;
+  border-color: #4a1d8a;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .navbar {
