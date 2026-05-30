@@ -21,6 +21,8 @@ model User {
   createdAt   DateTime     @default(now())
   memberships Membership[]
   posts       Post[]
+  events      Event[]
+  rsvps       RSVP[]
 }
 
 model Group {
@@ -31,6 +33,7 @@ model Group {
   createdAt   DateTime     @default(now())
   memberships Membership[]
   posts       Post[]
+  events      Event[]
 }
 
 model Post {
@@ -53,4 +56,27 @@ model Membership {
   groupId   Int
   user      User     @relation(fields: [userId], references: [id])
   group     Group    @relation(fields: [groupId], references: [id])
+}
+
+model Event {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String
+  date        DateTime
+  location    String?
+  createdAt   DateTime @default(now())
+  groupId     Int
+  userId      Int
+  group       Group    @relation(fields: [groupId], references: [id])
+  user        User     @relation(fields: [userId], references: [id])
+  rsvps       RSVP[]
+}
+
+model RSVP {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  userId    Int
+  eventId   Int
+  user      User     @relation(fields: [userId], references: [id])
+  event     Event    @relation(fields: [eventId], references: [id])
 }

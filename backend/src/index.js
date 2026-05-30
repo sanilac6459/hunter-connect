@@ -8,6 +8,8 @@ const groupRoutes = require("./routes/groupRoutes");
 const postRoutes = require("./routes/postRoutes");
 const membershipRoutes = require("./routes/membershipRoutes");
 const userRoutes = require("./routes/userRoutes");
+const eventRoutes = require("./routes/eventRoutes");
+const rsvpRoutes = require("./routes/rsvpRoutes");
 
 const app = express();
 
@@ -21,6 +23,8 @@ app.use("/groups", groupRoutes); // group CRUD
 app.use("/posts", postRoutes); // post CRUD
 app.use("/memberships", membershipRoutes); // join/leave clubs
 app.use("/users", userRoutes); // user profile
+app.use("/events", eventRoutes);
+app.use("/rsvps", rsvpRoutes);
 
 // test route
 app.get("/", (req, res) => {

@@ -5,6 +5,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useAuth } from "../context/useAuth";
 import PostCard from "../components/PostCard";
+import EventCard from "../components/EventCard";
 
 function GroupDetails() {
   const { id } = useParams();
@@ -12,14 +13,20 @@ function GroupDetails() {
   const navigate = useNavigate();
   const [group, setGroup] = useState(null);
   const [posts, setPosts] = useState([]);
+  const [events, setEvents] = useState([]);
   const [isMember, setIsMember] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [showPostForm, setShowPostForm] = useState(false);
+  const [showEventForm, setShowEventForm] = useState(false);
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [image, setImage] = useState(null);
   const [editingPost, setEditingPost] = useState(null);
   const [showMembers, setShowMembers] = useState(false);
+  const [eventTitle, setEventTitle] = useState("");
+  const [eventDescription, setEventDescription] = useState("");
+  const [eventDate, setEventDate] = useState("");
+  const [eventLocation, setEventLocation] = useState("");
 
   const fetchGroup = async () => {
     try {
@@ -54,10 +61,25 @@ function GroupDetails() {
     }
   };
 
+  const fetchEvents = async () => {
+    try {
+      const response = await axios.get(
+        `${import.meta.env.VITE_API_URL}/events/group/${id}`,
+        { headers: { Authorization: `Bearer ${token}` } },
+      );
+      setEvents(response.data);
+    } catch {
+      setEvents([]);
+    }
+  };
+
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchGroup();
-    if (token) fetchPosts();
+    if (token) {
+      fetchPosts();
+      fetchEvents();
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
@@ -154,6 +176,30 @@ function GroupDetails() {
     }
   };
 
+  const handleCreateEvent = async (e) => {
+    e.preventDefault();
+    try {
+      await axios.post(
+        `${import.meta.env.VITE_API_URL}/events/group/${id}`,
+        {
+          title: eventTitle,
+          description: eventDescription,
+          date: eventDate,
+          location: eventLocation,
+        },
+        { headers: { Authorization: `Bearer ${token}` } },
+      );
+      setEventTitle("");
+      setEventDescription("");
+      setEventDate("");
+      setEventLocation("");
+      setShowEventForm(false);
+      fetchEvents();
+    } catch {
+      alert("Failed to create event.");
+    }
+  };
+
   if (!group) return <div className="container">Loading...</div>;
 
   return (
@@ -177,8 +223,6 @@ function GroupDetails() {
           </div>
         )}
       </div>
-
-      {/* Members list — only visible to admins */}
       {isAdmin && showMembers && (
         <div className="members-section">
           <h2>Members</h2>
@@ -233,6 +277,59 @@ function GroupDetails() {
       {isMember && (
         <>
           <div className="posts-header">
+            <h2>Events</h2>
+            <button onClick={() => setShowEventForm(!showEventForm)}>
+              {showEventForm ? "Cancel" : "+ New Event"}
+            </button>
+          </div>
+
+          {showEventForm && (
+            <form className="create-form" onSubmit={handleCreateEvent}>
+              <input
+                type="text"
+                placeholder="Event title"
+                value={eventTitle}
+                onChange={(e) => setEventTitle(e.target.value)}
+                required
+              />
+              <textarea
+                placeholder="Event description"
+                value={eventDescription}
+                onChange={(e) => setEventDescription(e.target.value)}
+                required
+              />
+              <input
+                type="datetime-local"
+                value={eventDate}
+                onChange={(e) => setEventDate(e.target.value)}
+                required
+              />
+              <input
+                type="text"
+                placeholder="Location (optional)"
+                value={eventLocation}
+                onChange={(e) => setEventLocation(e.target.value)}
+              />
+              <button type="submit">Create Event</button>
+            </form>
+          )}
+
+          <div className="events-list">
+            {events.length === 0 && <p>No events yet.</p>}
+            {events.map((event) => (
+              <EventCard
+                key={event.id}
+                event={event}
+                currentUser={user}
+                isAdmin={isAdmin}
+                onRSVP={fetchEvents}
+                onDelete={fetchEvents}
+              />
+            ))}
+          </div>
+
+          {/* Posts Section */}
+          <div className="posts-header" style={{ marginTop: "2rem" }}>
             <h2>Posts</h2>
             <button
               onClick={() => {

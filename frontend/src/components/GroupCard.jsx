@@ -1,32 +1,32 @@
 import { useState } from "react";
 import axios from "axios";
 
-// card component to display group information on the home page
-function GroupCard({ group, token, onJoin, onClick, isMember }) {
+function GroupCard({ group, token, onJoin, onClick }) {
   const [joining, setJoining] = useState(false);
 
-  // handle joining the group
   const handleJoin = async (e) => {
     e.stopPropagation();
     if (joining) return;
     setJoining(true);
     try {
-      // create membership in the backend
       await axios.post(
         `${import.meta.env.VITE_API_URL}/memberships/join/${group.id}`,
         {},
         { headers: { Authorization: `Bearer ${token}` } },
       );
-      onJoin(); // adds group id to joinedGroupIds in Home → isMember becomes true
-      onClick(); // navigate into the group
-    } catch {
-      alert("Failed to join group.");
+      onJoin();
+      onClick();
+    } catch (err) {
+      if (err.response?.status === 400) {
+        alert("You're already in this club!");
+      } else {
+        alert("Failed to join club.");
+      }
     } finally {
       setJoining(false);
     }
   };
 
-  // render the group card
   return (
     <div className="group-card" onClick={onClick}>
       <div className="group-card-header">
@@ -40,21 +40,11 @@ function GroupCard({ group, token, onJoin, onClick, isMember }) {
         <h3>{group.name}</h3>
       </div>
       <p>{group.description}</p>
-      {token &&
-        (isMember ? (
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              onClick();
-            }}
-          >
-            View Group
-          </button>
-        ) : (
-          <button onClick={handleJoin} disabled={joining}>
-            {joining ? "Joining..." : "Join Group"}
-          </button>
-        ))}
+      {token && (
+        <button onClick={handleJoin} disabled={joining}>
+          {joining ? "Joining..." : "Join Club"}
+        </button>
+      )}
     </div>
   );
 }
