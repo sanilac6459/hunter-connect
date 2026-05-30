@@ -2,12 +2,14 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import { useAuth } from "../context/useAuth";
 import PostCard from "../components/PostCard";
+import EventCard from "../components/EventCard";
 import { useNavigate } from "react-router-dom";
 
 function Feed() {
   const { user, token } = useAuth();
   const navigate = useNavigate();
   const [posts, setPosts] = useState([]);
+  const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const fetchFeed = async () => {
@@ -18,23 +20,45 @@ function Feed() {
         { headers: { Authorization: `Bearer ${token}` } },
       );
 
-      // Fetch posts from each group
-      const postPromises = membershipsRes.data.map((group) =>
+      const groups = membershipsRes.data;
+
+      // Fetch posts and events from each group
+      const postPromises = groups.map((group) =>
         axios.get(`${import.meta.env.VITE_API_URL}/posts/group/${group.id}`, {
           headers: { Authorization: `Bearer ${token}` },
         }),
       );
 
-      const postResults = await Promise.all(postPromises);
+      const eventPromises = groups.map((group) =>
+        axios.get(`${import.meta.env.VITE_API_URL}/events/group/${group.id}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+      );
 
-      // Flatten all posts into one array and sort by newest first
+      const [postResults, eventResults] = await Promise.all([
+        Promise.all(postPromises),
+        Promise.all(eventPromises),
+      ]);
+
+      // Flatten and sort posts by newest first
       const allPosts = postResults
-        .flatMap((res) => res.data)
+        .flatMap((res, i) =>
+          res.data.map((post) => ({ ...post, groupName: groups[i].name })),
+        )
         .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
+      // Flatten and sort events by date
+      const allEvents = eventResults
+        .flatMap((res, i) =>
+          res.data.map((event) => ({ ...event, group: groups[i] })),
+        )
+        .sort((a, b) => new Date(a.date) - new Date(b.date));
+
       setPosts(allPosts);
+      setEvents(allEvents);
     } catch {
       setPosts([]);
+      setEvents([]);
     } finally {
       setLoading(false);
     }
@@ -54,25 +78,53 @@ function Feed() {
 
   return (
     <div className="container">
-      <div className="home-header">
-        <h1>Your Feed</h1>
-      </div>
       {loading && <p>Loading...</p>}
-      {!loading && posts.length === 0 && (
-        <p>No posts yet. Join some clubs to see their updates here!</p>
+
+      {/* Upcoming Events */}
+      {!loading && (
+        <>
+          <div className="home-header">
+            <h2>Upcoming Events</h2>
+          </div>
+          {events.length === 0 ? (
+            <p>No upcoming events from your clubs.</p>
+          ) : (
+            <div className="events-list">
+              {events.map((event) => (
+                <EventCard
+                  key={event.id}
+                  event={event}
+                  currentUser={user}
+                  isAdmin={false}
+                  onRSVP={fetchFeed}
+                  onDelete={fetchFeed}
+                />
+              ))}
+            </div>
+          )}
+
+          {/* Posts Feed */}
+          <div className="home-header" style={{ marginTop: "2rem" }}>
+            <h2>Latest Posts</h2>
+          </div>
+          {posts.length === 0 ? (
+            <p>No posts yet. Join some clubs to see their updates here!</p>
+          ) : (
+            <div className="posts-list">
+              {posts.map((post) => (
+                <PostCard
+                  key={post.id}
+                  post={post}
+                  currentUser={user}
+                  isAdmin={false}
+                  onDelete={fetchFeed}
+                  onEdit={() => {}}
+                />
+              ))}
+            </div>
+          )}
+        </>
       )}
-      <div className="posts-list">
-        {posts.map((post) => (
-          <PostCard
-            key={post.id}
-            post={post}
-            currentUser={user}
-            isAdmin={false}
-            onDelete={() => fetchFeed()}
-            onEdit={() => {}}
-          />
-        ))}
-      </div>
     </div>
   );
 }

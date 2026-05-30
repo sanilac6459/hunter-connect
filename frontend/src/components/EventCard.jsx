@@ -1,8 +1,10 @@
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useAuth } from "../context/useAuth";
 
 function EventCard({ event, onRSVP, onDelete, isAdmin, currentUser }) {
   const { token } = useAuth();
+  const navigate = useNavigate();
 
   const hasRSVPed = event.rsvps?.some((r) => r.userId === currentUser?.id);
 
@@ -53,9 +55,19 @@ function EventCard({ event, onRSVP, onDelete, isAdmin, currentUser }) {
       </div>
       <div className="event-info">
         <h3>{event.title}</h3>
-        <p>{event.description}</p>
-        {event.location && (
-          <p className="event-location">📍 {event.location}</p>
+        {event.group && (
+          <p className="event-club">
+            Club:{" "}
+            <span
+              className="event-club-link"
+              onClick={(e) => {
+                e.stopPropagation();
+                navigate(`/groups/${event.group.id}`);
+              }}
+            >
+              {event.group.name}
+            </span>
+          </p>
         )}
         <small>
           {eventDate.toLocaleDateString()} at{" "}
@@ -64,6 +76,10 @@ function EventCard({ event, onRSVP, onDelete, isAdmin, currentUser }) {
             minute: "2-digit",
           })}
         </small>
+        <p>{event.description}</p>
+        {event.location && (
+          <p className="event-location">📍 {event.location}</p>
+        )}
         <p className="event-rsvp-count">{event.rsvps?.length || 0} going</p>
       </div>
       <div className="event-actions">

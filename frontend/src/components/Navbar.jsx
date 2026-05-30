@@ -10,7 +10,6 @@ function Navbar() {
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef(null);
 
-  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
@@ -28,53 +27,56 @@ function Navbar() {
 
   return (
     <nav className="navbar">
+      {/* Left — Brand */}
       <Link to="/" className="navbar-brand">
         HunterConnect
       </Link>
-      <div className="navbar-links">
+
+      {/* Center — Nav links */}
+      {user && (
+        <div className="navbar-center">
+          <Link to="/" className="navbar-link">
+            Home
+          </Link>
+          <Link to="/clubs" className="navbar-link">
+            Clubs
+          </Link>
+          <Link to="/rsvps" className="navbar-link">
+            My RSVPs
+          </Link>
+        </div>
+      )}
+
+      {/* Right — Avatar or Sign In */}
+      <div className="navbar-right">
         {user ? (
-          <>
-            <Link to="/" className="navbar-link">
-              Home
-            </Link>
-            <Link to="/clubs" className="navbar-link">
-              Clubs
-            </Link>
-            <Link to="/rsvps" className="navbar-link">
-              My RSVPs
-            </Link>
-            <div className="avatar-wrapper" ref={dropdownRef}>
-              <div
-                className="avatar"
-                onClick={() => setShowDropdown(!showDropdown)}
-              >
-                {user.imageUrl ? (
-                  <img
-                    src={user.imageUrl}
-                    alt="avatar"
-                    className="avatar-img"
-                  />
-                ) : (
-                  <div className="avatar-placeholder">
-                    {user.name.charAt(0).toUpperCase()}
-                  </div>
-                )}
-              </div>
-              {showDropdown && (
-                <div className="avatar-dropdown">
-                  <p className="dropdown-name">Hello, {user.name}</p>
-                  <Link
-                    to="/settings"
-                    className="dropdown-settings"
-                    onClick={() => setShowDropdown(false)}
-                  >
-                    Settings
-                  </Link>
-                  <button onClick={handleLogout}>Sign Out</button>
+          <div className="avatar-wrapper" ref={dropdownRef}>
+            <div
+              className="avatar"
+              onClick={() => setShowDropdown(!showDropdown)}
+            >
+              {user.imageUrl ? (
+                <img src={user.imageUrl} alt="avatar" className="avatar-img" />
+              ) : (
+                <div className="avatar-placeholder">
+                  {user.name.charAt(0).toUpperCase()}
                 </div>
               )}
             </div>
-          </>
+            {showDropdown && (
+              <div className="avatar-dropdown">
+                <p className="dropdown-name">Hello, {user.name}</p>
+                <Link
+                  to="/settings"
+                  className="dropdown-settings"
+                  onClick={() => setShowDropdown(false)}
+                >
+                  Settings
+                </Link>
+                <button onClick={handleLogout}>Sign Out</button>
+              </div>
+            )}
+          </div>
         ) : (
           <Link to="/login" className="navbar-signin">
             Sign In

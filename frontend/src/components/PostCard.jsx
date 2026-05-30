@@ -4,6 +4,11 @@ function PostCard({ post, currentUser, isAdmin, onDelete, onEdit }) {
   return (
     <div className="post-card">
       <h3>{post.title}</h3>
+      {post.groupName && (
+        <p className="post-club">
+          Club: <span className="post-club-name">{post.groupName}</span>
+        </p>
+      )}
       <p>{post.content}</p>
       {post.imageUrl && (
         <img src={post.imageUrl} alt="Post" className="post-image" />

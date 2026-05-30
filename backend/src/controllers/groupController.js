@@ -101,11 +101,11 @@ const updateGroup = async (req, res) => {
 };
 
 // Delete a group — only admins can delete
+// Delete a group — only admins can delete
 const deleteGroup = async (req, res) => {
   const { id } = req.params;
   const userId = req.user.id;
   try {
-    // Check if user is an admin
     const membership = await prisma.membership.findFirst({
       where: { groupId: parseInt(id), userId, role: "ADMIN" },
     });
@@ -114,7 +114,15 @@ const deleteGroup = async (req, res) => {
         .status(403)
         .json({ error: "Only admins can delete this group." });
 
-    // Delete related records first to avoid foreign key errors
+    // Get all events in the group to delete their RSVPs first
+    const events = await prisma.event.findMany({
+      where: { groupId: parseInt(id) },
+    });
+    const eventIds = events.map((e) => e.id);
+
+    // Delete in correct order to avoid foreign key errors
+    await prisma.rSVP.deleteMany({ where: { eventId: { in: eventIds } } });
+    await prisma.event.deleteMany({ where: { groupId: parseInt(id) } });
     await prisma.post.deleteMany({ where: { groupId: parseInt(id) } });
     await prisma.membership.deleteMany({ where: { groupId: parseInt(id) } });
     await prisma.group.delete({ where: { id: parseInt(id) } });
