@@ -10,6 +10,7 @@ function Home() {
   const { user, token } = useAuth();
   const navigate = useNavigate();
   const [groups, setGroups] = useState([]);
+  const [userGroupIds, setUserGroupIds] = useState(new Set());
   const [search, setSearch] = useState("");
   const [showForm, setShowForm] = useState(false);
   const [name, setName] = useState("");
@@ -22,6 +23,14 @@ function Home() {
         `${import.meta.env.VITE_API_URL}/groups`,
       );
       setGroups(response.data);
+
+      if (token) {
+        const membershipsRes = await axios.get(
+          `${import.meta.env.VITE_API_URL}/memberships`,
+          { headers: { Authorization: `Bearer ${token}` } },
+        );
+        setUserGroupIds(new Set(membershipsRes.data.map((m) => m.id)));
+      }
     } catch {
       alert("Failed to fetch groups.");
     }
@@ -30,6 +39,7 @@ function Home() {
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchGroups();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleCreateGroup = async (e) => {
@@ -53,7 +63,6 @@ function Home() {
     }
   };
 
-  // filter groups based on search input
   const filteredGroups = groups.filter((group) =>
     group.name.toLowerCase().includes(search.toLowerCase()),
   );
@@ -114,6 +123,7 @@ function Home() {
             key={group.id}
             group={group}
             token={token}
+            isMember={userGroupIds.has(group.id)}
             onJoin={fetchGroups}
             onClick={() => navigate(`/groups/${group.id}`)}
           />

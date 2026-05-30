@@ -1,7 +1,7 @@
 import { useState } from "react";
 import axios from "axios";
 
-function GroupCard({ group, token, onJoin, onClick }) {
+function GroupCard({ group, token, onJoin, onClick, isMember }) {
   const [joining, setJoining] = useState(false);
 
   const handleJoin = async (e) => {
@@ -40,11 +40,14 @@ function GroupCard({ group, token, onJoin, onClick }) {
         <h3>{group.name}</h3>
       </div>
       <p>{group.description}</p>
-      {token && (
-        <button onClick={handleJoin} disabled={joining}>
-          {joining ? "Joining..." : "Join Club"}
-        </button>
-      )}
+      {token &&
+        (isMember ? (
+          <button onClick={onClick}>View Club</button>
+        ) : (
+          <button onClick={handleJoin} disabled={joining}>
+            {joining ? "Joining..." : "Join Club"}
+          </button>
+        ))}
     </div>
   );
 }
