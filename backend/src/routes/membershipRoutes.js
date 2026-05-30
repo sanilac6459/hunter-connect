@@ -1,6 +1,5 @@
 // handles endpoints for joining and leaving clubs
 
-// Handles endpoints for joining and leaving groups
 const express = require("express");
 const router = express.Router();
 const {

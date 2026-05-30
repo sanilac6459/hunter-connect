@@ -29,12 +29,10 @@ function Navbar() {
 
   return (
     <nav className="navbar">
-      {/* Left — Brand */}
       <Link to="/" className="navbar-brand">
         HunterConnect
       </Link>
 
-      {/* Center — Nav links (desktop) */}
       {user && (
         <div className="navbar-center">
           <Link to="/" className="navbar-link">
@@ -49,7 +47,6 @@ function Navbar() {
         </div>
       )}
 
-      {/* Right — Avatar or Sign In (desktop) */}
       <div className="navbar-right">
         {user ? (
           <div className="avatar-wrapper" ref={dropdownRef}>
@@ -86,7 +83,6 @@ function Navbar() {
         )}
       </div>
 
-      {/* Hamburger button (mobile only) */}
       <button
         className="hamburger"
         onClick={() => setShowMobileMenu(!showMobileMenu)}
@@ -96,7 +92,6 @@ function Navbar() {
         <span></span>
       </button>
 
-      {/* Mobile menu */}
       {showMobileMenu && (
         <div className="mobile-menu">
           {user ? (

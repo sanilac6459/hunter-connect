@@ -1,4 +1,5 @@
-// Handles endpoints for RSVP operations
+// handles endpoints for RSVP operations
+
 const express = require("express");
 const router = express.Router();
 const {

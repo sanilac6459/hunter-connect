@@ -1,5 +1,3 @@
-// handles user profile updates
-
 // handles user profile updates and account deletion
 
 const prisma = require("../prismaClient");

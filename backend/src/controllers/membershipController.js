@@ -2,7 +2,7 @@
 
 const prisma = require("../prismaClient");
 
-// Join a group — adds the user as a member
+// join a group — adds the user as a member
 const joinGroup = async (req, res) => {
   const { groupId } = req.params;
   const userId = req.user.id;
@@ -22,7 +22,7 @@ const joinGroup = async (req, res) => {
   }
 };
 
-// Leave a group — removes the user as a member
+// leave a group — removes the user as a member
 const leaveGroup = async (req, res) => {
   const { groupId } = req.params;
   const userId = req.user.id;
@@ -42,7 +42,7 @@ const leaveGroup = async (req, res) => {
   }
 };
 
-// Get all groups the logged in user is a member of
+// get all groups the logged in user is a member of
 const getUserGroups = async (req, res) => {
   const userId = req.user.id;
   try {
@@ -50,7 +50,7 @@ const getUserGroups = async (req, res) => {
       where: { userId },
       include: { group: true },
     });
-    // Return just the group info, not the full membership object
+    // return just the group info, not the full membership object
     const groups = memberships.map((m) => m.group);
     res.json(groups);
   } catch (error) {
@@ -58,14 +58,14 @@ const getUserGroups = async (req, res) => {
   }
 };
 
-// Promote or demote a member — only admins can do this
+// promote or demote a member — only admins can do this
 const updateMemberRole = async (req, res) => {
   const { groupId, userId: targetUserId } = req.params;
   const { role } = req.body;
   const requestingUserId = req.user.id;
 
   try {
-    // Check if requesting user is an admin
+    // check if requesting user is an admin
     const adminMembership = await prisma.membership.findFirst({
       where: {
         groupId: parseInt(groupId),
@@ -78,21 +78,21 @@ const updateMemberRole = async (req, res) => {
         .status(403)
         .json({ error: "Only admins can change member roles." });
 
-    // Make sure role is valid
+    // make sure role is valid
     if (!["ADMIN", "MEMBER"].includes(role)) {
       return res
         .status(400)
         .json({ error: "Invalid role. Must be ADMIN or MEMBER." });
     }
 
-    // Find the target member's membership
+    // find the target member's membership
     const membership = await prisma.membership.findFirst({
       where: { groupId: parseInt(groupId), userId: parseInt(targetUserId) },
     });
     if (!membership)
       return res.status(404).json({ error: "Member not found." });
 
-    // Update the role
+    // update the role
     const updated = await prisma.membership.update({
       where: { id: membership.id },
       data: { role },

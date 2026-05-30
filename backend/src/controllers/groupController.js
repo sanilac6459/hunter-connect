@@ -3,7 +3,7 @@
 const prisma = require("../prismaClient");
 const supabase = require("../supabaseClient");
 
-// Helper function to upload image to Supabase Storage
+// helper function to upload image to Supabase Storage
 const uploadImage = async (file) => {
   const fileName = `${Date.now()}_${file.originalname}`;
   const { error } = await supabase.storage
@@ -14,7 +14,7 @@ const uploadImage = async (file) => {
   return data.publicUrl;
 };
 
-// Get all groups
+// get all groups
 const getAllGroups = async (req, res) => {
   try {
     const groups = await prisma.group.findMany({
@@ -26,7 +26,7 @@ const getAllGroups = async (req, res) => {
   }
 };
 
-// Get a single group by id
+// get a single group by id
 const getGroupById = async (req, res) => {
   const { id } = req.params;
   try {
@@ -48,7 +48,7 @@ const getGroupById = async (req, res) => {
   }
 };
 
-// Create a new group and automatically add the creator as an ADMIN
+// create a new group and automatically add the creator as an ADMIN
 const createGroup = async (req, res) => {
   const { name, description } = req.body;
   const userId = req.user.id;
@@ -72,13 +72,13 @@ const createGroup = async (req, res) => {
   }
 };
 
-// Update a group — only admins can update
+// update a group — only admins can update
 const updateGroup = async (req, res) => {
   const { id } = req.params;
   const { name, description } = req.body;
   const userId = req.user.id;
   try {
-    // Check if user is an admin
+    // check if user is an admin
     const membership = await prisma.membership.findFirst({
       where: { groupId: parseInt(id), userId, role: "ADMIN" },
     });
@@ -100,8 +100,7 @@ const updateGroup = async (req, res) => {
   }
 };
 
-// Delete a group — only admins can delete
-// Delete a group — only admins can delete
+// delete a group — only admins can delete
 const deleteGroup = async (req, res) => {
   const { id } = req.params;
   const userId = req.user.id;
@@ -114,13 +113,13 @@ const deleteGroup = async (req, res) => {
         .status(403)
         .json({ error: "Only admins can delete this group." });
 
-    // Get all events in the group to delete their RSVPs first
+    // get all events in the group to delete their RSVPs first
     const events = await prisma.event.findMany({
       where: { groupId: parseInt(id) },
     });
     const eventIds = events.map((e) => e.id);
 
-    // Delete in correct order to avoid foreign key errors
+    // delete in correct order to avoid foreign key errors
     await prisma.rSVP.deleteMany({ where: { eventId: { in: eventIds } } });
     await prisma.event.deleteMany({ where: { groupId: parseInt(id) } });
     await prisma.post.deleteMany({ where: { groupId: parseInt(id) } });

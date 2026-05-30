@@ -22,7 +22,7 @@ function Settings() {
     },
   });
 
-  // Update name and email
+  // update name and email
   const onSubmit = async (data) => {
     try {
       const response = await axios.put(
@@ -39,7 +39,7 @@ function Settings() {
     }
   };
 
-  // Remove profile picture
+  // remove profile picture
   const handleRemovePicture = async () => {
     try {
       const response = await axios.delete(
@@ -54,7 +54,7 @@ function Settings() {
     }
   };
 
-  // Upload new profile picture
+  // upload new profile picture
   const handleImageUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -74,7 +74,7 @@ function Settings() {
     }
   };
 
-  // Delete account — called after modal confirmation
+  // delete account
   const handleDeleteAccount = async () => {
     try {
       await axios.delete(`${import.meta.env.VITE_API_URL}/users/account`, {
@@ -93,7 +93,6 @@ function Settings() {
       <div className="settings-page">
         <h1>Settings</h1>
 
-        {/* Profile Picture Section */}
         <div className="settings-section">
           <h2>Profile Picture</h2>
           <div className="avatar-preview">
@@ -130,7 +129,6 @@ function Settings() {
           </div>
         </div>
 
-        {/* Edit Profile Section */}
         <div className="settings-section">
           <h2>Edit Profile</h2>
           <form onSubmit={handleSubmit(onSubmit)} className="settings-form">
@@ -158,7 +156,6 @@ function Settings() {
           </form>
         </div>
 
-        {/* Danger Zone Section */}
         <div className="settings-section settings-danger">
           <h2>Danger Zone</h2>
           <p>Deleting your account is permanent and cannot be undone.</p>
@@ -171,7 +168,6 @@ function Settings() {
         </div>
       </div>
 
-      {/* Delete Confirmation Modal */}
       {showDeleteModal && (
         <div
           className="modal-overlay"

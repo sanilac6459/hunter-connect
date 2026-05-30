@@ -2,7 +2,7 @@ const { PrismaClient } = require("@prisma/client");
 const prisma = require("../prismaClient");
 const supabase = require("../supabaseClient");
 
-// Get all posts in a group
+// get all posts in a group
 const getPostsByGroup = async (req, res) => {
   const { groupId } = req.params;
   const userId = req.user.id;
@@ -24,7 +24,7 @@ const getPostsByGroup = async (req, res) => {
   }
 };
 
-// Create a post
+// create a post
 const createPost = async (req, res) => {
   const { groupId } = req.params;
   const { title, content } = req.body;
@@ -39,7 +39,7 @@ const createPost = async (req, res) => {
 
     let imageUrl = null;
 
-    // Handle image upload if file is provided
+    // handle image upload if file is provided
     if (req.file) {
       const file = req.file;
       const fileName = `${Date.now()}_${file.originalname}`;
@@ -69,7 +69,7 @@ const createPost = async (req, res) => {
   }
 };
 
-// Update a post
+// update a post
 const updatePost = async (req, res) => {
   const { id } = req.params;
   const { title, content } = req.body;
@@ -84,7 +84,7 @@ const updatePost = async (req, res) => {
 
     let imageUrl = post.imageUrl;
 
-    // Handle image upload if file is provided
+    // handle image upload if file is provided
     if (req.file) {
       const file = req.file;
       const fileName = `${Date.now()}_${file.originalname}`;
@@ -114,7 +114,7 @@ const updatePost = async (req, res) => {
   }
 };
 
-// Delete a post
+// delete a post
 const deletePost = async (req, res) => {
   const { id } = req.params;
   const userId = req.user.id;

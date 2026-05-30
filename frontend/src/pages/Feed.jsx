@@ -14,7 +14,7 @@ function Feed() {
 
   const fetchFeed = async () => {
     try {
-      // Get all groups the user is a member of
+      // get all groups the user is a member of
       const membershipsRes = await axios.get(
         `${import.meta.env.VITE_API_URL}/memberships`,
         { headers: { Authorization: `Bearer ${token}` } },
@@ -22,7 +22,7 @@ function Feed() {
 
       const groups = membershipsRes.data;
 
-      // Fetch posts and events from each group
+      // fetch posts and events from each group
       const postPromises = groups.map((group) =>
         axios.get(`${import.meta.env.VITE_API_URL}/posts/group/${group.id}`, {
           headers: { Authorization: `Bearer ${token}` },
@@ -40,14 +40,14 @@ function Feed() {
         Promise.all(eventPromises),
       ]);
 
-      // Flatten and sort posts by newest first
+      // flatten and sort posts by newest first
       const allPosts = postResults
         .flatMap((res, i) =>
           res.data.map((post) => ({ ...post, groupName: groups[i].name })),
         )
         .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
-      // Flatten and sort events by date
+      // flatten and sort events by date
       const allEvents = eventResults
         .flatMap((res, i) =>
           res.data.map((event) => ({ ...event, group: groups[i] })),
@@ -80,11 +80,10 @@ function Feed() {
     <div className="container">
       {loading && <p>Loading...</p>}
 
-      {/* Upcoming Events */}
       {!loading && (
         <>
           <div className="home-header">
-            <h2>Upcoming Events</h2>
+            <h1>Upcoming Events</h1>
           </div>
           {events.length === 0 ? (
             <p>No upcoming events from your clubs.</p>
@@ -103,9 +102,8 @@ function Feed() {
             </div>
           )}
 
-          {/* Posts Feed */}
           <div className="home-header" style={{ marginTop: "2rem" }}>
-            <h2>Latest Posts</h2>
+            <h1>Latest Posts</h1>
           </div>
           {posts.length === 0 ? (
             <p>No posts yet. Join some clubs to see their updates here!</p>

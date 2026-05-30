@@ -1,4 +1,5 @@
-// Handles RSVP operations for events
+// handles RSVP operations for events
+
 const prisma = require("../prismaClient");
 
 // RSVP to an event
@@ -6,7 +7,7 @@ const rsvpEvent = async (req, res) => {
   const { eventId } = req.params;
   const userId = req.user.id;
   try {
-    // Check if already RSVPed
+    // check if already RSVPed
     const existingRSVP = await prisma.rSVP.findFirst({
       where: { eventId: parseInt(eventId), userId },
     });
@@ -22,7 +23,7 @@ const rsvpEvent = async (req, res) => {
   }
 };
 
-// Cancel RSVP
+// cancel RSVP
 const cancelRSVP = async (req, res) => {
   const { eventId } = req.params;
   const userId = req.user.id;
@@ -39,7 +40,7 @@ const cancelRSVP = async (req, res) => {
   }
 };
 
-// Get all events the user has RSVPed to
+// get all events the user has RSVPed to
 const getUserRSVPs = async (req, res) => {
   const userId = req.user.id;
   try {

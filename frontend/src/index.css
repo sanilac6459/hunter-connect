@@ -83,6 +83,7 @@ body {
   display: flex;
   justify-content: flex-end;
   align-items: center;
+  grid-column: 3;
 }
 
 /* Container */
@@ -1253,7 +1254,7 @@ body {
 /* Responsive Design */
 @media (max-width: 768px) {
   .navbar {
-    padding: 0.8rem 1rem;
+    padding: 1.2rem 1.5rem;
     display: flex;
     justify-content: space-between;
     position: relative;

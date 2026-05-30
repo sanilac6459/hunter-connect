@@ -1,4 +1,5 @@
-// Handles endpoints for event CRUD operations
+// handles endpoints for event CRUD operations
+
 const express = require("express");
 const router = express.Router();
 const {
