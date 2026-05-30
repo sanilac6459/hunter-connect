@@ -8,6 +8,7 @@ function Navbar() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [showDropdown, setShowDropdown] = useState(false);
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
   const dropdownRef = useRef(null);
 
   useEffect(() => {
@@ -23,6 +24,7 @@ function Navbar() {
   const handleLogout = () => {
     logout();
     navigate("/login");
+    setShowMobileMenu(false);
   };
 
   return (
@@ -32,7 +34,7 @@ function Navbar() {
         HunterConnect
       </Link>
 
-      {/* Center — Nav links */}
+      {/* Center — Nav links (desktop) */}
       {user && (
         <div className="navbar-center">
           <Link to="/" className="navbar-link">
@@ -47,7 +49,7 @@ function Navbar() {
         </div>
       )}
 
-      {/* Right — Avatar or Sign In */}
+      {/* Right — Avatar or Sign In (desktop) */}
       <div className="navbar-right">
         {user ? (
           <div className="avatar-wrapper" ref={dropdownRef}>
@@ -83,6 +85,66 @@ function Navbar() {
           </Link>
         )}
       </div>
+
+      {/* Hamburger button (mobile only) */}
+      <button
+        className="hamburger"
+        onClick={() => setShowMobileMenu(!showMobileMenu)}
+      >
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+
+      {/* Mobile menu */}
+      {showMobileMenu && (
+        <div className="mobile-menu">
+          {user ? (
+            <>
+              <p className="mobile-menu-name">Hello, {user.name}</p>
+              <Link
+                to="/"
+                className="mobile-menu-link"
+                onClick={() => setShowMobileMenu(false)}
+              >
+                Home
+              </Link>
+              <Link
+                to="/clubs"
+                className="mobile-menu-link"
+                onClick={() => setShowMobileMenu(false)}
+              >
+                Clubs
+              </Link>
+              <Link
+                to="/rsvps"
+                className="mobile-menu-link"
+                onClick={() => setShowMobileMenu(false)}
+              >
+                My RSVPs
+              </Link>
+              <Link
+                to="/settings"
+                className="mobile-menu-link"
+                onClick={() => setShowMobileMenu(false)}
+              >
+                Settings
+              </Link>
+              <button className="mobile-menu-signout" onClick={handleLogout}>
+                Sign Out
+              </button>
+            </>
+          ) : (
+            <Link
+              to="/login"
+              className="mobile-menu-link"
+              onClick={() => setShowMobileMenu(false)}
+            >
+              Sign In
+            </Link>
+          )}
+        </div>
+      )}
     </nav>
   );
 }
