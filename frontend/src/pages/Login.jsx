@@ -4,8 +4,8 @@ import { useForm } from "react-hook-form";
 import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
 import { useAuth } from "../context/useAuth";
+import { useState } from "react";
 
-// login page component
 function Login() {
   const {
     register,
@@ -14,9 +14,10 @@ function Login() {
   } = useForm();
   const { login } = useAuth();
   const navigate = useNavigate();
+  const [loginError, setLoginError] = useState("");
 
-  // handle form submission and log in the user
   const onSubmit = async (data) => {
+    setLoginError("");
     try {
       const response = await axios.post(
         `${import.meta.env.VITE_API_URL}/auth/login`,
@@ -25,11 +26,10 @@ function Login() {
       login(response.data.user, response.data.token);
       navigate("/");
     } catch {
-      alert("Invalid email or password.");
+      setLoginError("Invalid email or password.");
     }
   };
 
-  // render the login form
   return (
     <div className="auth-container">
       <h2>Login</h2>
@@ -54,6 +54,28 @@ function Login() {
         </div>
         <button type="submit">Login</button>
       </form>
+
+      {loginError && (
+        <div className="modal-overlay" onClick={() => setLoginError("")}>
+          <div
+            className="modal delete-modal"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="delete-modal-icon">⚠️</div>
+            <h2>Login Failed</h2>
+            <p>{loginError}</p>
+            <div className="delete-modal-actions">
+              <button
+                className="delete-modal-confirm"
+                onClick={() => setLoginError("")}
+              >
+                OK
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <p>
         Don't have an account? <Link to="/register">Register</Link>
       </p>
