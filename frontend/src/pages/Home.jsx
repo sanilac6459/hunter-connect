@@ -53,7 +53,7 @@ function Home() {
     }
   };
 
-  // Filter groups based on search input
+  // filter groups based on search input
   const filteredGroups = groups.filter((group) =>
     group.name.toLowerCase().includes(search.toLowerCase()),
   );
@@ -69,7 +69,6 @@ function Home() {
         )}
       </div>
 
-      {/* Search bar */}
       <div className="search-bar">
         <input
           type="text"
