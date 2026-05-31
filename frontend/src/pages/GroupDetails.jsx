@@ -241,10 +241,14 @@ function GroupDetails() {
 
   return (
     <div className="container">
-      {/* Group Header with profile picture */}
       <div
         className="group-header"
-        style={{ display: "flex", alignItems: "center", gap: "1.5rem" }}
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: "1.5rem",
+          marginBottom: "2rem",
+        }}
       >
         {group.imageUrl ? (
           <img
