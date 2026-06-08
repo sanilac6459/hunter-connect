@@ -550,7 +550,7 @@ body.dark-mode .mobile-menu {
 }
 
 .group-header p {
-  color: #666;
+  color: #2d1457;
   font-size: 0.95rem;
 }
 
@@ -572,12 +572,12 @@ body.dark-mode .mobile-menu {
 }
 
 .group-actions button:first-child {
-  background-color: #f39c12;
+  background-color: #e74c3c;
   color: white;
 }
 
 .group-actions button:last-child {
-  background-color: #e74c3c;
+  background-color: #f39c12;
   color: white;
 }
 

@@ -170,7 +170,7 @@ function GroupDetails() {
       await axios.delete(`${import.meta.env.VITE_API_URL}/groups/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      navigate("/");
+      navigate("/clubs");
     } catch {
       showModal("error", "Failed to delete group.");
     }
