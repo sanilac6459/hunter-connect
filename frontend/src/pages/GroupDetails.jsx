@@ -34,6 +34,7 @@ function GroupDetails() {
     action: null,
     message: "",
   });
+  const [activeTab, setActiveTab] = useState("about");
 
   const showModal = (type, message) => setModal({ show: true, type, message });
   const closeModal = () => setModal({ show: false, type: "", message: "" });
@@ -241,15 +242,8 @@ function GroupDetails() {
 
   return (
     <div className="container">
-      <div
-        className="group-header"
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: "1.5rem",
-          marginBottom: "2rem",
-        }}
-      >
+      {/* Group Header */}
+      <div className="group-header">
         {group.imageUrl ? (
           <img
             src={group.imageUrl}
@@ -330,51 +324,101 @@ function GroupDetails() {
 
       {isMember && (
         <>
-          {/* Events Section */}
-          <div className="posts-header">
-            <h2>Events</h2>
-            <button onClick={() => setShowEventForm(true)}>+ New Event</button>
+          {/* Tab Bar */}
+          <div className="group-tabs">
+            <button
+              className={`group-tab ${activeTab === "about" ? "group-tab-active" : ""}`}
+              onClick={() => setActiveTab("about")}
+            >
+              About
+            </button>
+            <button
+              className={`group-tab ${activeTab === "posts" ? "group-tab-active" : ""}`}
+              onClick={() => setActiveTab("posts")}
+            >
+              Posts
+            </button>
+            <button
+              className={`group-tab ${activeTab === "events" ? "group-tab-active" : ""}`}
+              onClick={() => setActiveTab("events")}
+            >
+              Events
+            </button>
           </div>
 
-          <div className="events-list">
-            {events.length === 0 && <p>No events yet.</p>}
-            {events.map((event) => (
-              <EventCard
-                key={event.id}
-                event={event}
-                currentUser={user}
-                isAdmin={isAdmin}
-                onRSVP={fetchEvents}
-                onDelete={fetchEvents}
-              />
-            ))}
-          </div>
+          {/* About Tab */}
+          {activeTab === "about" && (
+            <div className="settings-section">
+              <h2>About {group.name}</h2>
+              <p style={{ color: "#555", lineHeight: "1.7" }}>
+                {group.description || "No description provided."}
+              </p>
+              <p
+                style={{ marginTop: "1rem", color: "#888", fontSize: "0.9rem" }}
+              >
+                {group.memberships.length} member
+                {group.memberships.length !== 1 ? "s" : ""}
+              </p>
+            </div>
+          )}
 
-          {/* Posts Section */}
-          <div className="posts-header" style={{ marginTop: "2rem" }}>
-            <h2>Posts</h2>
-            <button onClick={() => setShowPostForm(true)}>+ New Post</button>
-          </div>
+          {/* Posts Tab */}
+          {activeTab === "posts" && (
+            <>
+              <div className="posts-header">
+                <h2>Posts</h2>
+                <button onClick={() => setShowPostForm(true)}>
+                  + New Post
+                </button>
+              </div>
+              <div className="posts-list">
+                {posts.length === 0 && (
+                  <p>No posts yet. Be the first to post!</p>
+                )}
+                {posts.map((post) => (
+                  <PostCard
+                    key={post.id}
+                    post={post}
+                    currentUser={user}
+                    isAdmin={isAdmin}
+                    onDelete={handleDeletePost}
+                    onEdit={(post) => {
+                      setEditingPost(post);
+                      setTitle(post.title);
+                      setContent(post.content);
+                      setImage(null);
+                      setShowPostForm(true);
+                    }}
+                  />
+                ))}
+              </div>
+            </>
+          )}
 
-          <div className="posts-list">
-            {posts.length === 0 && <p>No posts yet. Be the first to post!</p>}
-            {posts.map((post) => (
-              <PostCard
-                key={post.id}
-                post={post}
-                currentUser={user}
-                isAdmin={isAdmin}
-                onDelete={handleDeletePost}
-                onEdit={(post) => {
-                  setEditingPost(post);
-                  setTitle(post.title);
-                  setContent(post.content);
-                  setImage(null);
-                  setShowPostForm(true);
-                }}
-              />
-            ))}
-          </div>
+          {/* Events Tab */}
+          {activeTab === "events" && (
+            <>
+              <div className="posts-header">
+                <h2>Events</h2>
+                <button onClick={() => setShowEventForm(true)}>
+                  + New Event
+                </button>
+              </div>
+              <div className="events-list">
+                {events.length === 0 && <p>No events yet.</p>}
+                {events.map((event) => (
+                  <EventCard
+                    key={event.id}
+                    event={event}
+                    currentUser={user}
+                    isAdmin={isAdmin}
+                    onRSVP={fetchEvents}
+                    onDelete={fetchEvents}
+                  />
+                ))}
+              </div>
+            </>
+          )}
         </>
       )}
 

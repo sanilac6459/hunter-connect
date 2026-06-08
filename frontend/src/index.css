@@ -1433,6 +1433,38 @@ body.dark-mode .mobile-menu {
   background-color: #3b1570;
 }
 
+.group-tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 2px solid #ede9f7;
+  padding-bottom: 0;
+}
+
+.group-tab {
+  background: none;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #888;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  transition:
+    color 0.2s,
+    border-color 0.2s;
+}
+
+.group-tab:hover {
+  color: #4a1d8a;
+}
+
+.group-tab-active {
+  color: #4a1d8a;
+  border-bottom: 2px solid #4a1d8a;
+}
+
 @media (max-width: 768px) {
   .hamburger-dark-toggle {
     display: flex;
