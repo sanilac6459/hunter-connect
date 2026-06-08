@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import axios from "axios";
@@ -10,6 +10,12 @@ function Settings() {
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showPhotoMenu, setShowPhotoMenu] = useState(false);
+  const [successModal, setSuccessModal] = useState({
+    show: false,
+    message: "",
+  });
+  const fileInputRef = useRef(null);
 
   const {
     register,
@@ -22,7 +28,6 @@ function Settings() {
     },
   });
 
-  // update name and email
   const onSubmit = async (data) => {
     try {
       const response = await axios.put(
@@ -39,22 +44,21 @@ function Settings() {
     }
   };
 
-  // remove profile picture
   const handleRemovePicture = async () => {
+    setShowPhotoMenu(false);
     try {
       const response = await axios.delete(
         `${import.meta.env.VITE_API_URL}/users/profile-picture`,
         { headers: { Authorization: `Bearer ${token}` } },
       );
       updateUser(response.data);
-      setMessage("Profile picture removed.");
+      setSuccessModal({ show: true, message: "Profile picture removed." });
       setError("");
     } catch {
       setError("Failed to remove profile picture.");
     }
   };
 
-  // upload new profile picture
   const handleImageUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -67,14 +71,13 @@ function Settings() {
         { headers: { Authorization: `Bearer ${token}` } },
       );
       updateUser(response.data);
-      setMessage("Profile picture updated!");
+      setSuccessModal({ show: true, message: "Profile picture updated!" });
       setError("");
     } catch {
       setError("Failed to upload profile picture.");
     }
   };
 
-  // delete account
   const handleDeleteAccount = async () => {
     try {
       await axios.delete(`${import.meta.env.VITE_API_URL}/users/account`, {
@@ -108,24 +111,48 @@ function Settings() {
               </div>
             )}
           </div>
+
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            onChange={handleImageUpload}
+            style={{ display: "none" }}
+          />
+
           <div className="settings-picture-actions">
-            <label className="settings-upload-btn">
-              Change Photo
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleImageUpload}
-                style={{ display: "none" }}
-              />
-            </label>
-            {user?.imageUrl && (
+            <div className="photo-menu-wrapper">
               <button
-                className="settings-remove-btn"
-                onClick={handleRemovePicture}
+                className="settings-upload-btn"
+                onClick={() => setShowPhotoMenu((prev) => !prev)}
               >
-                Remove Photo
+                Update Photo
               </button>
-            )}
+              {showPhotoMenu && (
+                <div
+                  className="photo-menu"
+                  onMouseLeave={() => setShowPhotoMenu(false)}
+                >
+                  <button
+                    className="photo-menu-item"
+                    onClick={() => {
+                      setShowPhotoMenu(false);
+                      fileInputRef.current.click();
+                    }}
+                  >
+                    {user?.imageUrl ? "Change Photo" : "Upload Photo"}
+                  </button>
+                  {user?.imageUrl && (
+                    <button
+                      className="photo-menu-item photo-menu-item--danger"
+                      onClick={handleRemovePicture}
+                    >
+                      Delete Photo
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
@@ -197,6 +224,26 @@ function Settings() {
                 Yes, Delete My Account
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {successModal.show && (
+        <div
+          className="modal-overlay"
+          onClick={() => setSuccessModal({ show: false, message: "" })}
+        >
+          <div
+            className="modal success-modal"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2>{successModal.message}</h2>
+            <button
+              className="success-modal-close"
+              onClick={() => setSuccessModal({ show: false, message: "" })}
+            >
+              OK
+            </button>
           </div>
         </div>
       )}
